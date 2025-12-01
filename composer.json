@@ -12,6 +12,7 @@
         "doctrine/orm": "^3.5",
         "dompdf/dompdf": "^3.1",
         "easycorp/easyadmin-bundle": "^4.27",
+        "liip/imagine-bundle": "^2.15",
         "paypal/paypal-checkout-sdk": "^1.0",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpstan/phpdoc-parser": "^2.3",
