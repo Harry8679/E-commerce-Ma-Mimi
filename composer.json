@@ -10,6 +10,7 @@
         "doctrine/doctrine-bundle": "^3.1",
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.5",
+        "dompdf/dompdf": "^3.1",
         "easycorp/easyadmin-bundle": "^4.27",
         "paypal/paypal-checkout-sdk": "^1.0",
         "phpdocumentor/reflection-docblock": "^5.6",
