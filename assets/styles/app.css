@@ -1,3 +1,10 @@
-body {
-    background-color: skyblue;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Styles personnalisés pour le site de rhum */
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition duration-300;
+  }
 }
