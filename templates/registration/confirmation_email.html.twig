@@ -1,0 +1,19 @@
+<h1>Bonjour !</h1>
+
+<p>
+    Merci de vous être inscrit sur Rhum Shop !<br>
+    Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous :
+</p>
+
+<p>
+    <a href="{{ signedUrl|raw }}">Confirmer mon email</a>
+</p>
+
+<p>
+    Ce lien expirera dans {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
+</p>
+
+<p>
+    Cordialement,<br>
+    L'équipe Rhum Shop
+</p>
