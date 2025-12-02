@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block body %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <h1 class="text-3xl font-bold text-center mb-6 text-gray-900">Créer un compte</h1>
+
+        {{ form_start(registrationForm) }}
+            <div class="mb-4">
+                {{ form_label(registrationForm.email, 'Email', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+                {{ form_widget(registrationForm.email, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500'}}) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(registrationForm.firstName, 'Prénom', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+                {{ form_widget(registrationForm.firstName, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500'}}) }}
+                {{ form_errors(registrationForm.firstName) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(registrationForm.lastName, 'Nom', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+                {{ form_widget(registrationForm.lastName, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500'}}) }}
+                {{ form_errors(registrationForm.lastName) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+                {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500'}}) }}
+                {{ form_errors(registrationForm.plainPassword) }}
+                <p class="mt-1 text-xs text-gray-500">Minimum 6 caractères</p>
+            </div>
+
+            <div class="mb-6">
+                {{ form_row(registrationForm.agreeTerms, {
+                    'label': 'J\'accepte les conditions générales',
+                    'label_attr': {'class': 'text-sm text-gray-600'}
+                }) }}
+            </div>
+
+            <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-lg transition">
+                Créer mon compte
+            </button>
+        {{ form_end(registrationForm) }}
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                Vous avez déjà un compte ?
+                <a href="{{ path('app_login') }}" class="text-amber-600 hover:text-amber-700 font-semibold">
+                    Se connecter
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
