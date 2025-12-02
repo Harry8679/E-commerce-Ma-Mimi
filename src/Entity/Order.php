@@ -529,7 +529,7 @@ class Order
     {
         // unset the owning side of the relation if necessary
         if ($payment === null && $this->payment !== null) {
-            $this->payment->setOrder(null);
+            $this->payment = null;
         }
 
         // set the owning side of the relation if necessary
@@ -550,7 +550,7 @@ class Order
     {
         // unset the owning side of the relation if necessary
         if ($invoice === null && $this->invoice !== null) {
-            $this->invoice->setOrder(null);
+            $this->invoice = null;
         }
 
         // set the owning side of the relation if necessary
