@@ -592,4 +592,70 @@ class Order
             $this->setBillingCountry($address->getCountry());
         }
     }
+
+    public function getCarrier(): ?Carrier
+    {
+        return $this->carrier;
+    }
+
+    public function setCarrier(?Carrier $carrier): static
+    {
+        $this->carrier = $carrier;
+        return $this;
+    }
+
+    public function getCarrierName(): ?string
+    {
+        return $this->carrierName;
+    }
+
+    public function setCarrierName(?string $carrierName): static
+    {
+        $this->carrierName = $carrierName;
+        return $this;
+    }
+
+    public function getCarrierPrice(): ?string
+    {
+        return $this->carrierPrice;
+    }
+
+    public function setCarrierPrice(?string $carrierPrice): static
+    {
+        $this->carrierPrice = $carrierPrice;
+        return $this;
+    }
+
+    /**
+     * Copie les informations du transporteur dans la commande (pour l'historique)
+     */
+    public function copyCarrierInfo(): void
+    {
+        if ($this->carrier) {
+            $this->carrierName = $this->carrier->getName();
+            $this->carrierPrice = $this->carrier->getPrice();
+        }
+    }
+
+    /**
+     * Calcule le montant total de la commande (produits + transporteur + taxes)
+     */
+    public function calculateTotal(): void
+    {
+        $subTotal = 0;
+        
+        // Calculer le sous-total des produits
+        foreach ($this->orderItems as $item) {
+            $subTotal += (float) $item->getTotalPrice();
+        }
+        
+        // Ajouter le prix du transporteur
+        $carrierCost = $this->carrierPrice ? (float) $this->carrierPrice : 0;
+        
+        // Calculer les taxes (si applicable)
+        $taxAmount = 0; // À ajuster selon votre logique de calcul
+        
+        // Total final
+        $this->totalAmount = (string) ($subTotal + $carrierCost + $taxAmount);
+    }
 }
