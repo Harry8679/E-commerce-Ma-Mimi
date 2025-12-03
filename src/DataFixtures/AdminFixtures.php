@@ -4,16 +4,20 @@ namespace App\DataFixtures;
 
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class AdminFixtures extends Fixture
+class AdminFixtures extends Fixture implements FixtureGroupInterface
 {
-    private UserPasswordHasherInterface $passwordHasher;
+    public function __construct(
+        private UserPasswordHasherInterface $passwordHasher
+    ) {
+    }
 
-    public function __construct(UserPasswordHasherInterface $passwordHasher)
+    public static function getGroups(): array
     {
-        $this->passwordHasher = $passwordHasher;
+        return ['admin'];
     }
 
     public function load(ObjectManager $manager): void
