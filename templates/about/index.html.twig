@@ -1,0 +1,272 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}À propos - Notre histoire{% endblock %}
+
+{% block body %}
+<div class="bg-gradient-to-br from-amber-50 to-amber-100 -mt-8 -mx-4 px-4 py-16 mb-12">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-5xl font-bold text-amber-900 mb-4">Notre Histoire</h1>
+        <p class="text-xl text-amber-800">Une passion pour les rhums d'exception</p>
+    </div>
+</div>
+
+<div class="max-w-5xl mx-auto">
+    {# Section: L'histoire #}
+    <section class="mb-16">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">🥃 La Passion du Rhum</h2>
+                <div class="prose prose-lg text-gray-700 space-y-4">
+                    <p>
+                        Tout a commencé par une passion dévorante pour les spiritueux des Caraïbes. 
+                        Fascinée par la richesse aromatique et la diversité des rhums, j'ai décidé de 
+                        partager cette passion en créant ma propre collection.
+                    </p>
+                    <p>
+                        Chaque bouteille que je propose est soigneusement sélectionnée lors de mes 
+                        voyages dans les distilleries traditionnelles des îles. Je privilégie les 
+                        producteurs artisanaux qui perpétuent des méthodes ancestrales de fabrication.
+                    </p>
+                    <p>
+                        Mon objectif ? Vous faire découvrir des rhums d'exception, issus de petites 
+                        productions, avec des profils gustatifs uniques que vous ne trouverez nulle 
+                        part ailleurs.
+                    </p>
+                </div>
+            </div>
+            <div class="bg-amber-100 rounded-2xl p-8 text-center">
+                <div class="text-6xl mb-4">🌴</div>
+                <h3 class="text-2xl font-bold text-amber-900 mb-4">Des Caraïbes à Votre Verre</h3>
+                <p class="text-amber-800">
+                    Une sélection rigoureuse de rhums artisanaux provenant des plus belles 
+                    distilleries des îles tropicales.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    {# Section: Nos valeurs #}
+    <section class="mb-16 bg-white rounded-2xl shadow-lg p-10">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Nos Valeurs</h2>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="bg-amber-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-4xl">✨</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Qualité</h3>
+                <p class="text-gray-600">
+                    Chaque rhum est testé et approuvé personnellement. Seuls les meilleurs 
+                    intègrent notre catalogue.
+                </p>
+            </div>
+
+            <div class="text-center">
+                <div class="bg-amber-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-4xl">🤝</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Authenticité</h3>
+                <p class="text-gray-600">
+                    Nous travaillons directement avec des producteurs artisanaux qui respectent 
+                    les traditions de fabrication.
+                </p>
+            </div>
+
+            <div class="text-center">
+                <div class="bg-amber-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-4xl">🌱</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Durabilité</h3>
+                <p class="text-gray-600">
+                    Nous privilégions les producteurs engagés dans une démarche éco-responsable 
+                    et respectueuse de l'environnement.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    {# Section: Le processus #}
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Notre Démarche</h2>
+        
+        <div class="space-y-8">
+            <div class="flex items-start space-x-6">
+                <div class="flex-shrink-0 w-12 h-12 bg-amber-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                    1
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Exploration & Découverte</h3>
+                    <p class="text-gray-600">
+                        Je voyage régulièrement dans les Caraïbes pour découvrir de nouvelles distilleries 
+                        et rencontrer les maîtres rhumiers. C'est lors de ces voyages que je déniche des 
+                        perles rares.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-start space-x-6">
+                <div class="flex-shrink-0 w-12 h-12 bg-amber-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                    2
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Sélection Rigoureuse</h3>
+                    <p class="text-gray-600">
+                        Chaque rhum passe par une dégustation approfondie. J'analyse les arômes, la texture, 
+                        la longueur en bouche. Seuls les rhums d'exception sont retenus.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-start space-x-6">
+                <div class="flex-shrink-0 w-12 h-12 bg-amber-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                    3
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Partage & Dégustation</h3>
+                    <p class="text-gray-600">
+                        Je partage ma passion à travers ce site, mais aussi lors d'événements de dégustation. 
+                        Mon but est de transmettre mon amour pour ces spiritueux d'exception.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-start space-x-6">
+                <div class="flex-shrink-0 w-12 h-12 bg-amber-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                    4
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Livraison avec Soin</h3>
+                    <p class="text-gray-600">
+                        Chaque bouteille est emballée avec le plus grand soin pour qu'elle arrive en 
+                        parfait état chez vous. Car un rhum d'exception mérite un traitement d'exception.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# Section: Types de rhums #}
+    <section class="mb-16 bg-gradient-to-br from-amber-800 to-amber-900 rounded-2xl p-10 text-white">
+        <h2 class="text-3xl font-bold text-center mb-12">Nos Spécialités</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+            <div>
+                <h3 class="text-2xl font-bold mb-4 flex items-center">
+                    <span class="text-3xl mr-3">🍯</span>
+                    Rhums Agricoles
+                </h3>
+                <p class="text-amber-100">
+                    Issus du pur jus de canne à sucre, ces rhums développent des arômes végétaux 
+                    et floraux intenses. Particulièrement appréciés en Martinique et Guadeloupe.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-bold mb-4 flex items-center">
+                    <span class="text-3xl mr-3">🍬</span>
+                    Rhums Traditionnels
+                </h3>
+                <p class="text-amber-100">
+                    Élaborés à partir de mélasse, ces rhums offrent des notes plus rondes et sucrées. 
+                    Parfaits pour la dégustation pure ou en cocktails raffinés.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-bold mb-4 flex items-center">
+                    <span class="text-3xl mr-3">⏳</span>
+                    Rhums Vieux
+                </h3>
+                <p class="text-amber-100">
+                    Vieillis en fûts de chêne, ces rhums développent une complexité aromatique 
+                    exceptionnelle avec des notes boisées, vanillées et épicées.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-bold mb-4 flex items-center">
+                    <span class="text-3xl mr-3">💎</span>
+                    Éditions Limitées
+                </h3>
+                <p class="text-amber-100">
+                    Des cuvées rares et confidentielles, produites en quantités limitées par des 
+                    maîtres rhumiers passionnés. De véritables trésors pour collectionneurs.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    {# Section: Engagement qualité #}
+    <section class="mb-16">
+        <div class="bg-amber-50 rounded-2xl p-10 border-2 border-amber-200">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">Notre Engagement Qualité</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 text-gray-700">
+                <div class="flex items-start space-x-4">
+                    <span class="text-2xl">✓</span>
+                    <div>
+                        <h4 class="font-bold mb-2">Authenticité Garantie</h4>
+                        <p>Toutes nos bouteilles proviennent directement des distilleries officielles.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-4">
+                    <span class="text-2xl">✓</span>
+                    <div>
+                        <h4 class="font-bold mb-2">Livraison Sécurisée</h4>
+                        <p>Emballage anti-casse et suivi de colis pour une réception en toute sérénité.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-4">
+                    <span class="text-2xl">✓</span>
+                    <div>
+                        <h4 class="font-bold mb-2">Conseils Personnalisés</h4>
+                        <p>Besoin d'aide pour choisir ? Je suis là pour vous guider selon vos goûts.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-4">
+                    <span class="text-2xl">✓</span>
+                    <div>
+                        <h4 class="font-bold mb-2">Satisfaction Client</h4>
+                        <p>Votre satisfaction est ma priorité. Service client réactif et à l'écoute.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# Call to action #}
+    <section class="text-center mb-16">
+        <div class="bg-gradient-to-r from-amber-600 to-amber-700 rounded-2xl p-12 text-white">
+            <h2 class="text-3xl font-bold mb-4">Prêt à Découvrir Nos Rhums ?</h2>
+            <p class="text-xl mb-8 text-amber-100">
+                Explorez notre collection et laissez-vous tenter par des saveurs uniques
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#" class="bg-white text-amber-700 px-8 py-4 rounded-lg font-bold hover:bg-amber-50 transition inline-block">
+                    Voir la Boutique
+                </a>
+                <a href="{{ path('app_register') }}" class="bg-amber-800 text-white px-8 py-4 rounded-lg font-bold hover:bg-amber-900 transition inline-block">
+                    Créer un Compte
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {# Section: Avertissement légal #}
+    <section class="bg-red-50 border-l-4 border-red-500 p-6 rounded">
+        <div class="flex items-start">
+            <span class="text-3xl mr-4">⚠️</span>
+            <div>
+                <h3 class="text-lg font-bold text-red-900 mb-2">Consommation Responsable</h3>
+                <p class="text-red-800 text-sm">
+                    L'abus d'alcool est dangereux pour la santé. À consommer avec modération. 
+                    La vente d'alcool est interdite aux mineurs. L'acheteur doit être majeur.
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

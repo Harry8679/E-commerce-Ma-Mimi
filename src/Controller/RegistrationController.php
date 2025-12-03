@@ -4,25 +4,15 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
-use App\Security\EmailVerifier;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class RegistrationController extends AbstractController
 {
-    private EmailVerifier $emailVerifier;
-
-    public function __construct(EmailVerifier $emailVerifier)
-    {
-        $this->emailVerifier = $emailVerifier;
-    }
-
     #[Route('/inscription', name: 'app_register')]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
@@ -31,6 +21,7 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Encoder le mot de passe
             $user->setPassword(
                 $userPasswordHasher->hashPassword(
                     $user,
@@ -38,19 +29,14 @@ class RegistrationController extends AbstractController
                 )
             );
 
+            // Vérifier automatiquement l'email
+            $user->setIsVerified(true);
+
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // Envoyer l'email de confirmation
-            $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
-                (new TemplatedEmail())
-                    ->from(new Address('noreply@rhum-shop.com', 'Rhum Shop'))
-                    ->to($user->getEmail())
-                    ->subject('Confirmez votre adresse email')
-                    ->htmlTemplate('registration/confirmation_email.html.twig')
-            );
-
-            $this->addFlash('success', 'Votre compte a été créé ! Un email de confirmation vous a été envoyé.');
+            // Message de succès
+            $this->addFlash('success', '🎉 Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.');
 
             return $this->redirectToRoute('app_login');
         }
@@ -58,21 +44,5 @@ class RegistrationController extends AbstractController
         return $this->render('registration/register.html.twig', [
             'registrationForm' => $form,
         ]);
-    }
-
-    #[Route('/verify/email', name: 'app_verify_email')]
-    public function verifyUserEmail(Request $request): Response
-    {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-
-        try {
-            $this->emailVerifier->handleEmailConfirmation($request, $this->getUser());
-        } catch (\Exception $exception) {
-            $this->addFlash('error', 'Le lien de vérification est invalide ou a expiré.');
-            return $this->redirectToRoute('app_register');
-        }
-
-        $this->addFlash('success', 'Votre adresse email a été vérifiée avec succès !');
-        return $this->redirectToRoute('app_home');
     }
 }

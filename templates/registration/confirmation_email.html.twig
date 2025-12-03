@@ -4,37 +4,45 @@
     <meta charset="UTF-8">
     <title>Confirmation d'email</title>
 </head>
-<body>
-    <h1>Bonjour {{ user is defined ? user.firstName : '' }} !</h1>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background-color: #d97706; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0;">🥃 Rhum Shop</h1>
+    </div>
+    
+    <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <h2 style="color: #d97706;">Bonjour !</h2>
 
-    <p>
-        Merci de vous être inscrit sur Rhum Shop !<br>
-        Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous :
-    </p>
+        <p>
+            Merci de vous être inscrit sur <strong>Rhum Shop</strong> !<br>
+            Pour finaliser votre inscription, veuillez confirmer votre adresse email en cliquant sur le bouton ci-dessous :
+        </p>
 
-    <p>
-        <a href="{{ signedUrl|raw }}" style="background-color: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-            Confirmer mon email
-        </a>
-    </p>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ signedUrl|raw }}" style="background-color: #d97706; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+                ✅ Confirmer mon email
+            </a>
+        </div>
 
-    <p>
-        Ou copiez ce lien dans votre navigateur :<br>
-        {{ signedUrl|raw }}
-    </p>
+        <p style="color: #666; font-size: 14px; border-left: 3px solid #d97706; padding-left: 15px; margin: 20px 0;">
+            <strong>Lien de secours :</strong><br>
+            Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :<br>
+            <a href="{{ signedUrl|raw }}" style="color: #d97706; word-break: break-all;">{{ signedUrl|raw }}</a>
+        </p>
 
-    <p>
-        Ce lien expirera dans {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
-    </p>
+        <p style="color: #999; font-size: 13px;">
+            ⏰ Ce lien expirera dans {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
+        </p>
 
-    <p>
-        Cordialement,<br>
-        L'équipe Rhum Shop
-    </p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
 
-    <hr>
-    <p style="font-size: 12px; color: #666;">
-        L'abus d'alcool est dangereux pour la santé. À consommer avec modération.
-    </p>
+        <p>
+            Cordialement,<br>
+            <strong>L'équipe Rhum Shop</strong>
+        </p>
+
+        <p style="font-size: 11px; color: #999; margin-top: 30px; text-align: center;">
+            ⚠️ L'abus d'alcool est dangereux pour la santé. À consommer avec modération.
+        </p>
+    </div>
 </body>
 </html>
