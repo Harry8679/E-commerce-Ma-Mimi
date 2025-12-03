@@ -119,6 +119,16 @@ class Order
     #[ORM\OneToOne(mappedBy: 'order', cascade: ['persist', 'remove'])]
     private ?Invoice $invoice = null;
 
+    #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Carrier $carrier = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $carrierName = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $carrierPrice = null;
+
     public function __construct()
     {
         $this->orderItems = new ArrayCollection();
