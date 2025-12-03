@@ -14,54 +14,54 @@
 <body class="bg-gray-50">
     <!-- Navigation -->
     <!-- Navigation -->
-<nav class="bg-white shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <div class="flex-shrink-0 flex items-center">
-                    <a href="{{ path('app_home') }}" class="text-2xl font-bold text-amber-800">
-                        🥃 Rhum Shop
-                    </a>
-                </div>
-                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    <a href="{{ path('app_home') }}" class="{{ app.request.attributes.get('_route') == 'app_home' ? 'border-amber-500 text-amber-700' : 'border-transparent text-gray-900 hover:border-amber-500 hover:text-amber-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                        Accueil
-                    </a>
-                    <a href="#" class="{{ app.request.attributes.get('_route') == 'app_shop' ? 'border-amber-500 text-amber-700' : 'border-transparent text-gray-900 hover:border-amber-500 hover:text-amber-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                        Boutique
-                    </a>
-                    <a href="{{ path('app_about') }}" class="{{ app.request.attributes.get('_route') == 'app_about' ? 'border-amber-500 text-amber-700' : 'border-transparent text-gray-900 hover:border-amber-500 hover:text-amber-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                        À propos
-                    </a>
-                </div>
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
-                {% if app.user %}
-                    <a href="#" class="text-gray-700 hover:text-amber-700">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                        </svg>
-                    </a>
-                    <div class="relative ml-3">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-gray-700">{{ app.user.firstName }}</span>
-                            <a href="{{ path('app_logout') }}" class="text-sm text-gray-700 hover:text-amber-700">
-                                Déconnexion
-                            </a>
-                        </div>
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{{ path('app_home') }}" class="text-2xl font-bold text-amber-800">
+                            🥃 Rhum Shop
+                        </a>
                     </div>
-                {% else %}
-                    <a href="{{ path('app_login') }}" class="text-gray-700 hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium">
-                        Connexion
-                    </a>
-                    <a href="{{ path('app_register') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                        Inscription
-                    </a>
-                {% endif %}
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{{ path('app_home') }}" class="{{ app.request.attributes.get('_route') == 'app_home' ? 'border-amber-500 text-amber-700' : 'border-transparent text-gray-900 hover:border-amber-500 hover:text-amber-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Accueil
+                        </a>
+                        <a href="#" class="{{ app.request.attributes.get('_route') == 'app_shop' ? 'border-amber-500 text-amber-700' : 'border-transparent text-gray-900 hover:border-amber-500 hover:text-amber-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Boutique
+                        </a>
+                        <a href="{{ path('app_about') }}" class="{{ app.request.attributes.get('_route') == 'app_about' ? 'border-amber-500 text-amber-700' : 'border-transparent text-gray-900 hover:border-amber-500 hover:text-amber-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            À propos
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+                    {% if app.user %}
+                        <a href="#" class="text-gray-700 hover:text-amber-700">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                            </svg>
+                        </a>
+                        <div class="relative ml-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-gray-700">{{ app.user.firstName }}</span>
+                                <a href="{{ path('app_logout') }}" class="text-sm text-gray-700 hover:text-amber-700">
+                                    Déconnexion
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{{ path('app_login') }}" class="text-gray-700 hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium">
+                            Connexion
+                        </a>
+                        <a href="{{ path('app_register') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Inscription
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
     <!-- Messages flash -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
