@@ -16,28 +16,31 @@ class CarrierRepository extends ServiceEntityRepository
         parent::__construct($registry, Carrier::class);
     }
 
-    //    /**
-    //     * @return Carrier[] Returns an array of Carrier objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Récupère tous les transporteurs actifs triés par position
+     */
+    public function findActiveCarriers(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.isActive = :active')
+            ->setParameter('active', true)
+            ->orderBy('c.position', 'ASC')
+            ->addOrderBy('c.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Carrier
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Trouve un transporteur actif par son ID
+     */
+    public function findActiveCarrierById(int $id): ?Carrier
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.id = :id')
+            ->andWhere('c.isActive = :active')
+            ->setParameter('id', $id)
+            ->setParameter('active', true)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
