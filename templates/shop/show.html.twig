@@ -60,10 +60,10 @@
             <div class="grid grid-cols-2 gap-4">
                 {% if product.alcoholVolume %}
                     <div class="flex items-center">
-                        <span class="text-2xl mr-2">🔥</span>
+                        {# <span class="text-2xl mr-2">🔥</span> #}
                         <div>
                             <div class="text-xs text-gray-600">Degré d'alcool</div>
-                            <div class="font-semibold">{{ product.alcoholVolume }}</div>
+                            <div class="font-semibold">{{ product.alcoholVolume }} ° 🌡️</div>
                         </div>
                     </div>
                 {% endif %}
