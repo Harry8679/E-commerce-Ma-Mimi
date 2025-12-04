@@ -146,6 +146,12 @@ class Product
         return $this;
     }
 
+    // Ajoutez une méthode helper pour le formatage
+    public function getFormattedPrice(): string
+    {
+        return number_format((float) $this->price, 2, ',', ' ');
+    }
+
     public function getStock(): ?int
     {
         return $this->stock;
