@@ -95,16 +95,17 @@
 
                             <div class="flex items-center gap-3 text-sm text-gray-600 mb-3">
                                 {% if product.alcoholVolume %}
-                                    <span>{{ product.alcoholVolume }} 🌡️</span>
+                                    <span>{{ product.alcoholVolume }}° 🌡️</span>
                                 {% endif %}
                                 {% if product.volume %}
-                                    <span>📏 {{ product.volume }}</span>
+                                    <span>{{ product.volume }}cl 🍷</span>
                                 {% endif %}
                             </div>
 
                             <div class="flex items-center justify-between mt-4">
                                 <span class="text-2xl font-bold text-amber-700">
-                                    {{ product.price|number_format(2, ',', ' ') }} €
+                                    {# {{ product.price|number_format(2, ',', ' ') }} € #}
+                                    {{ product.formattedPrice }} €
                                 </span>
                                 
                                 <a href="{{ path('app_product_show', {slug: product.slug}) }}" 
