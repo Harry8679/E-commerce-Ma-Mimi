@@ -104,8 +104,7 @@
 
                             <div class="flex items-center justify-between mt-4">
                                 <span class="text-2xl font-bold text-amber-700">
-                                    {# {{ product.price|number_format(2, ',', ' ') }} € #}
-                                    {{ product.formattedPrice }} €
+                                    {{ product.price|number_format(2, ',', ' ') }} €
                                 </span>
                                 
                                 <a href="{{ path('app_product_show', {slug: product.slug}) }}" 

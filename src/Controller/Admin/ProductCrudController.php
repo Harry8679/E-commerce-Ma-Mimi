@@ -12,7 +12,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
@@ -52,16 +51,17 @@ class ProductCrudController extends AbstractCrudController
         yield SlugField::new('slug', 'Slug')->setTargetFieldName('name')->hideOnIndex();
         yield AssociationField::new('category', 'Catégorie');
         yield TextareaField::new('description', 'Description')->hideOnIndex();
-        yield MoneyField::new('price', 'Prix')->setCurrency('EUR');
-        // Remplacez MoneyField par NumberField
-        // Remplacez MoneyField par NumberField
-        // yield NumberField::new('price', 'Prix (€)')->setNumDecimals(2)->setStoredAsFractional(false);
+        
+        // Utiliser NumberField au lieu de MoneyField
+        yield NumberField::new('price', 'Prix (€)')
+            ->setNumDecimals(2);
+        
         yield IntegerField::new('stock', 'Stock');
         yield TextField::new('alcoholVolume', 'Degré d\'alcool')->hideOnIndex();
         yield TextField::new('volume', 'Volume')->hideOnIndex();
         yield TextField::new('origin', 'Origine')->hideOnIndex();
         yield ImageField::new('image', 'Image principale')
-            ->setBasePath('/uploads/products/')  // ← AJOUT DU SLASH ICI
+            ->setBasePath('/uploads/products/')
             ->setUploadDir('public/uploads/products/')
             ->setUploadedFileNamePattern('[randomhash].[extension]')
             ->setRequired(false);
