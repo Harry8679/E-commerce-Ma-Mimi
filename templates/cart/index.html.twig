@@ -1,20 +1,190 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello CartController!{% endblock %}
+{% block title %}Mon Panier{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-900 mb-8">🛒 Mon Panier</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {% if cartItems is empty %}
+        {# Panier vide #}
+        <div class="bg-white rounded-lg shadow-md p-12 text-center">
+            <div class="text-6xl mb-4">🛒</div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Votre panier est vide</h2>
+            <p class="text-gray-600 mb-6">Découvrez notre sélection de rhums d'exception</p>
+            <a href="{{ path('app_shop') }}" class="inline-block bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-lg font-semibold transition">
+                Voir la boutique
+            </a>
+        </div>
+    {% else %}
+        <div class="grid lg:grid-cols-3 gap-8">
+            {# Liste des articles #}
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Produit</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Prix</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Quantité</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Sous-total</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                {% for item in cartItems %}
+                                    <tr class="hover:bg-gray-50">
+                                        {# Produit #}
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <a href="{{ path('app_product_show', {slug: item.product.slug}) }}" class="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
+                                                    {% if item.product.image %}
+                                                        <img src="/uploads/products/{{ item.product.image }}" 
+                                                             alt="{{ item.product.name }}" 
+                                                             class="w-full h-full object-cover">
+                                                    {% else %}
+                                                        <div class="w-full h-full flex items-center justify-center">
+                                                            <span class="text-3xl">🥃</span>
+                                                        </div>
+                                                    {% endif %}
+                                                </a>
+                                                <div class="ml-4">
+                                                    <a href="{{ path('app_product_show', {slug: item.product.slug}) }}" class="text-sm font-semibold text-gray-900 hover:text-amber-700">
+                                                        {{ item.product.name }}
+                                                    </a>
+                                                    <p class="text-xs text-gray-600">{{ item.product.category.name }}</p>
+                                                    {% if item.product.stock < item.quantity %}
+                                                        <p class="text-xs text-red-600 mt-1">
+                                                            ⚠️ Stock insuffisant ({{ item.product.stock }} disponible{{ item.product.stock > 1 ? 's' : '' }})
+                                                        </p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/admin/Desktop/Programming/EBANG_MEZUI/Mariam-Mimi/e-commerce-rhum/src/Controller/CartController.php</code></li>
-        <li>Your template at <code>/Users/admin/Desktop/Programming/EBANG_MEZUI/Mariam-Mimi/e-commerce-rhum/templates/cart/index.html.twig</code></li>
-    </ul>
+                                        {# Prix unitaire #}
+                                        <td class="px-6 py-4 text-center whitespace-nowrap">
+                                            <span class="text-sm font-semibold text-gray-900">
+                                                {{ item.product.formattedPrice }} €
+                                            </span>
+                                        </td>
+
+                                        {# Quantité #}
+                                        <td class="px-6 py-4">
+                                            <form method="post" action="{{ path('app_cart_update', {id: item.product.id}) }}" class="flex items-center justify-center">
+                                                <input type="number" 
+                                                       name="quantity" 
+                                                       value="{{ item.quantity }}" 
+                                                       min="1" 
+                                                       max="{{ item.product.stock }}"
+                                                       onchange="this.form.submit()"
+                                                       class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center focus:ring-amber-500 focus:border-amber-500">
+                                            </form>
+                                        </td>
+
+                                        {# Sous-total #}
+                                        <td class="px-6 py-4 text-center whitespace-nowrap">
+                                            <span class="text-sm font-bold text-amber-700">
+                                                {{ (item.subtotal)|number_format(2, ',', ' ') }} €
+                                            </span>
+                                        </td>
+
+                                        {# Actions #}
+                                        <td class="px-6 py-4 text-center">
+                                            <form method="post" action="{{ path('app_cart_remove', {id: item.product.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer ce produit ?')">
+                                                <button type="submit" class="text-red-600 hover:text-red-800 transition">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {# Actions sur le panier #}
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+                        <a href="{{ path('app_shop') }}" class="text-amber-600 hover:text-amber-700 font-semibold text-sm flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            Continuer mes achats
+                        </a>
+
+                        <form method="post" action="{{ path('app_cart_clear') }}" onsubmit="return confirm('Êtes-vous sûr de vouloir vider votre panier ?')">
+                            <button type="submit" class="text-red-600 hover:text-red-800 font-semibold text-sm">
+                                Vider le panier
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {# Récapitulatif #}
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6">Récapitulatif</h2>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Sous-total</span>
+                            <span class="font-semibold">{{ total|number_format(2, ',', ' ') }} €</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Livraison</span>
+                            <span class="text-gray-500">Calculée à l'étape suivante</span>
+                        </div>
+                        <hr class="my-4">
+                        <div class="flex justify-between text-lg">
+                            <span class="font-bold text-gray-900">Total</span>
+                            <span class="font-bold text-amber-700">{{ total|number_format(2, ',', ' ') }} €</span>
+                        </div>
+                    </div>
+
+                    {% if app.user %}
+                        <a href="#" class="block w-full bg-amber-600 hover:bg-amber-700 text-white text-center font-bold py-3 rounded-lg transition mb-3">
+                            Passer la commande
+                        </a>
+                    {% else %}
+                        <a href="{{ path('app_login') }}" class="block w-full bg-amber-600 hover:bg-amber-700 text-white text-center font-bold py-3 rounded-lg transition mb-3">
+                            Se connecter pour commander
+                        </a>
+                    {% endif %}
+
+                    <p class="text-xs text-gray-600 text-center">
+                        Paiement 100% sécurisé<br>
+                        <span class="font-semibold">Stripe • PayPal</span>
+                    </p>
+
+                    <hr class="my-6">
+
+                    <div class="space-y-3 text-sm text-gray-600">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Livraison rapide sous 24-48h</span>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Emballage soigné et sécurisé</span>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Service client réactif</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
