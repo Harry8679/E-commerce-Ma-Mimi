@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande confirmée{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto text-center">
+    <div class="bg-white rounded-lg shadow-md p-12">
+        <div class="text-6xl mb-6">🎉</div>
+        
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Merci pour votre commande !</h1>
+        
+        <p class="text-lg text-gray-600 mb-8">
+            Votre paiement a été accepté avec succès.<br>
+            Numéro de commande : <span class="font-bold text-amber-700">{{ order.orderNumber }}</span>
+        </p>
+
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
+            <h2 class="font-bold text-green-900 mb-2">✅ Commande confirmée</h2>
+            <p class="text-sm text-green-800">
+                Vous allez recevoir un email de confirmation à l'adresse : <strong>{{ app.user.email }}</strong>
+            </p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+            <h3 class="font-bold text-gray-900 mb-4">Récapitulatif</h3>
+            <div class="text-left space-y-2">
+                {% for item in order.orderItems %}
+                    <div class="flex justify-between text-sm">
+                        <span>{{ item.productName }} (x{{ item.quantity }})</span>
+                        <span class="font-semibold">{{ item.totalPrice|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                {% endfor %}
+                <hr class="my-2">
+                <div class="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span class="text-amber-700">{{ order.totalAmount|number_format(2, ',', ' ') }} €</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="#" class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-lg font-semibold transition">
+                Voir ma commande
+            </a>
+            <a href="{{ path('app_shop') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-3 rounded-lg font-semibold transition">
+                Retour à la boutique
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
