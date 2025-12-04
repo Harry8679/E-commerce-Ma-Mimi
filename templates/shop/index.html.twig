@@ -1,20 +1,143 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ShopController!{% endblock %}
+{% block title %}Boutique - Nos Rhums{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/admin/Desktop/Programming/EBANG_MEZUI/Mariam-Mimi/e-commerce-rhum/src/Controller/ShopController.php</code></li>
-        <li>Your template at <code>/Users/admin/Desktop/Programming/EBANG_MEZUI/Mariam-Mimi/e-commerce-rhum/templates/shop/index.html.twig</code></li>
-    </ul>
+<div class="bg-gradient-to-br from-amber-50 to-amber-100 -mt-8 -mx-4 px-4 py-12 mb-8">
+    <div class="max-w-7xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-amber-900 mb-2">Notre Collection de Rhums</h1>
+        <p class="text-lg text-amber-800">Découvrez nos rhums d'exception soigneusement sélectionnés</p>
+    </div>
 </div>
+
+<div class="flex flex-col lg:flex-row gap-8">
+    {# Sidebar - Filtres #}
+    <aside class="lg:w-64 flex-shrink-0">
+        <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Catégories</h2>
+            
+            <ul class="space-y-2">
+                <li>
+                    <a href="{{ path('app_shop') }}" 
+                       class="block px-4 py-2 rounded-lg transition {{ not selectedCategory ? 'bg-amber-100 text-amber-800 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                        🥃 Tous les rhums
+                    </a>
+                </li>
+                {% for category in categories %}
+                    <li>
+                        <a href="{{ path('app_shop', {category: category.id}) }}" 
+                           class="block px-4 py-2 rounded-lg transition {{ selectedCategory == category.id ? 'bg-amber-100 text-amber-800 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                            {{ category.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </aside>
+
+    {# Contenu principal - Grille de produits #}
+    <main class="flex-1">
+        {% if products is empty %}
+            <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                <div class="text-6xl mb-4">📦</div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Aucun produit disponible</h3>
+                <p class="text-gray-600 mb-6">Il n'y a pas encore de produits dans cette catégorie.</p>
+                <a href="{{ path('app_shop') }}" class="inline-block bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+                    Voir tous les produits
+                </a>
+            </div>
+        {% else %}
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {% for product in products %}
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+                        {# Image du produit #}
+                        <a href="{{ path('app_product_show', {slug: product.slug}) }}" class="block relative overflow-hidden bg-gray-100" style="padding-top: 100%;">
+                            {% if product.image %}
+                                <img src="/uploads/products/{{ product.image }}" 
+                                     alt="{{ product.name }}" 
+                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                            {% else %}
+                                <div class="absolute inset-0 flex items-center justify-center bg-gray-200">
+                                    <span class="text-6xl">🥃</span>
+                                </div>
+                            {% endif %}
+                            
+                            {# Badge "À la une" #}
+                            {% if product.isFeatured %}
+                                <span class="absolute top-3 left-3 bg-amber-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    ⭐ À la une
+                                </span>
+                            {% endif %}
+                            
+                            {# Badge stock #}
+                            {% if product.stock <= 0 %}
+                                <span class="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    Rupture
+                                </span>
+                            {% elseif product.stock < 5 %}
+                                <span class="absolute top-3 right-3 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    Plus que {{ product.stock }}
+                                </span>
+                            {% endif %}
+                        </a>
+
+                        {# Informations du produit #}
+                        <div class="p-4">
+                            <a href="{{ path('app_product_show', {slug: product.slug}) }}" class="block">
+                                <h3 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-amber-700 transition">
+                                    {{ product.name }}
+                                </h3>
+                            </a>
+                            
+                            <p class="text-sm text-gray-600 mb-2">
+                                {{ product.category.name }}
+                            </p>
+
+                            <div class="flex items-center gap-3 text-sm text-gray-600 mb-3">
+                                {% if product.alcoholVolume %}
+                                    <span>🔥 {{ product.alcoholVolume }}</span>
+                                {% endif %}
+                                {% if product.volume %}
+                                    <span>📏 {{ product.volume }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex items-center justify-between mt-4">
+                                <span class="text-2xl font-bold text-amber-700">
+                                    {{ product.price|number_format(2, ',', ' ') }} €
+                                </span>
+                                
+                                <a href="{{ path('app_product_show', {slug: product.slug}) }}" 
+                                   class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold transition">
+                                    Voir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </main>
+</div>
+
+{# Section informations #}
+<section class="mt-16 bg-gradient-to-r from-amber-800 to-amber-900 rounded-2xl p-10 text-white">
+    <div class="grid md:grid-cols-3 gap-8 text-center">
+        <div>
+            <div class="text-4xl mb-3">🚚</div>
+            <h3 class="text-xl font-bold mb-2">Livraison Rapide</h3>
+            <p class="text-amber-100">Expédition sous 24-48h</p>
+        </div>
+        <div>
+            <div class="text-4xl mb-3">✅</div>
+            <h3 class="text-xl font-bold mb-2">Qualité Garantie</h3>
+            <p class="text-amber-100">Produits authentiques</p>
+        </div>
+        <div>
+            <div class="text-4xl mb-3">💳</div>
+            <h3 class="text-xl font-bold mb-2">Paiement Sécurisé</h3>
+            <p class="text-amber-100">Stripe et PayPal</p>
+        </div>
+    </div>
+</section>
 {% endblock %}
