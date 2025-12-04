@@ -107,31 +107,40 @@
         </div>
 
         {# Bouton ajouter au panier #}
-        {% if product.stock > 0 %}
-            <form method="post" action="#" class="mb-6">
-                <div class="flex items-center gap-4 mb-4">
-                    <label for="quantity" class="font-semibold">Quantité :</label>
-                    <input type="number" 
-                           name="quantity" 
-                           id="quantity" 
-                           value="1" 
-                           min="1" 
-                           max="{{ product.stock }}"
-                           class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500">
-                </div>
-                
-                <button type="submit" 
-                        class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-lg transition text-lg">
-                    🛒 Ajouter au panier
-                </button>
-            </form>
-        {% else %}
-            <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
-                <p class="text-red-800 font-semibold text-center">
-                    ❌ Produit actuellement en rupture de stock
-                </p>
-            </div>
-        {% endif %}
+{% if product.stock > 0 %}
+    <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}" class="mb-6">
+        <div class="flex items-center gap-4 mb-4">
+            <label for="quantity" class="font-semibold">Quantité :</label>
+            <input type="number" 
+                   name="quantity" 
+                   id="quantity" 
+                   value="1" 
+                   min="1" 
+                   max="{{ product.stock }}"
+                   class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500">
+        </div>
+        
+        <button type="submit" 
+                name="redirect_to"
+                value="product"
+                class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-lg transition text-lg mb-2">
+            🛒 Ajouter au panier
+        </button>
+        
+        <button type="submit"
+                name="redirect_to"
+                value="cart"
+                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 rounded-lg transition">
+            Ajouter et voir le panier
+        </button>
+    </form>
+{% else %}
+    <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
+        <p class="text-red-800 font-semibold text-center">
+            ❌ Produit actuellement en rupture de stock
+        </p>
+    </div>
+{% endif %}
 
         {# Description #}
         <div class="prose prose-lg max-w-none">
