@@ -86,20 +86,19 @@ class CheckoutController extends AbstractController
         }
 
         /** @var User $user */
-        $user = $this->getUser();
+        $user = $this->getAuthenticatedUser();
 
         // Créer la session Stripe
         $session = $this->stripeService->createCheckoutSession(
             $stripeItems,
             $this->generateUrl('app_checkout_success', [
-                'orderId' => $order->getId(),
-                'session_id' => '{CHECKOUT_SESSION_ID}'
-            ], UrlGeneratorInterface::ABSOLUTE_URL),
+                'orderId' => $order->getId()
+            ], UrlGeneratorInterface::ABSOLUTE_URL) . '?session_id={CHECKOUT_SESSION_ID}',  // ← CORRECTION ICI
             $this->generateUrl('app_checkout_cancel', [
                 'orderId' => $order->getId()
             ], UrlGeneratorInterface::ABSOLUTE_URL),
             [
-                'order_id' => $order->getId(),
+                'order_id' => (string) $order->getId(),
                 'customer_email' => $user->getEmail(),
             ]
         );
