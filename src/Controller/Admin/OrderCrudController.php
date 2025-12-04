@@ -12,7 +12,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
@@ -73,7 +73,11 @@ class OrderCrudController extends AbstractCrudController
                 Order::STATUS_CANCELLED => 'danger',
                 Order::STATUS_REFUNDED => 'secondary',
             ]);
-        yield MoneyField::new('totalAmount', 'Montant total')->setCurrency('EUR');
+        
+        // Remplacer MoneyField par NumberField
+        yield NumberField::new('totalAmount', 'Montant total (€)')
+            ->setNumDecimals(2);
+        
         yield AssociationField::new('carrier', 'Transporteur')->hideOnIndex();
         yield TextField::new('shippingFullName', 'Nom livraison')->onlyOnDetail();
         yield TextField::new('shippingCity', 'Ville livraison')->onlyOnDetail();
