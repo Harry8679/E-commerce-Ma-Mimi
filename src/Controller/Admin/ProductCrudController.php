@@ -13,6 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -51,7 +52,9 @@ class ProductCrudController extends AbstractCrudController
         yield SlugField::new('slug', 'Slug')->setTargetFieldName('name')->hideOnIndex();
         yield AssociationField::new('category', 'Catégorie');
         yield TextareaField::new('description', 'Description')->hideOnIndex();
-        yield MoneyField::new('price', 'Prix')->setCurrency('EUR');
+        // yield MoneyField::new('price', 'Prix')->setCurrency('EUR');
+        // Remplacez MoneyField par NumberField
+        yield NumberField::new('price', 'Prix (€)')->setNumDecimals(2);
         yield IntegerField::new('stock', 'Stock');
         yield TextField::new('alcoholVolume', 'Degré d\'alcool')->hideOnIndex();
         yield TextField::new('volume', 'Volume')->hideOnIndex();
