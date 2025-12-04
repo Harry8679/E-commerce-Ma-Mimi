@@ -1,0 +1,73 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    <h1 class="title">
+        🥃 Tableau de bord - Rhum Shop
+    </h1>
+{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2>Bienvenue dans l'administration</h2>
+                    <p class="lead">Gérez votre boutique de rhums depuis cet espace.</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card text-white bg-primary mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">📦 Commandes</h5>
+                                    <p class="card-text" style="font-size: 2rem;">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="card text-white bg-success mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">🍾 Produits</h5>
+                                    <p class="card-text" style="font-size: 2rem;">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="card text-white bg-info mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">👥 Clients</h5>
+                                    <p class="card-text" style="font-size: 2rem;">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="card text-white bg-warning mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">💰 CA du mois</h5>
+                                    <p class="card-text" style="font-size: 2rem;">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h4>Actions rapides</h4>
+                    <div class="btn-group" role="group">
+                        <a href="{{ ea_url().setController('App\\Controller\\Admin\\OrderCrudController').setAction('index') }}" class="btn btn-primary">
+                            <i class="fas fa-shopping-cart"></i> Voir les commandes
+                        </a>
+                        <a href="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('new') }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Ajouter un produit
+                        </a>
+                        <a href="{{ path('app_home') }}" class="btn btn-secondary" target="_blank">
+                            <i class="fas fa-eye"></i> Voir le site
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

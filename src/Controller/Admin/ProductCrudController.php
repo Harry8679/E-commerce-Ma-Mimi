@@ -57,10 +57,10 @@ class ProductCrudController extends AbstractCrudController
         yield TextField::new('volume', 'Volume')->hideOnIndex();
         yield TextField::new('origin', 'Origine')->hideOnIndex();
         yield ImageField::new('image', 'Image principale')
-            ->setBasePath('uploads/products/')
+            ->setBasePath('/uploads/products/')  // ← AJOUT DU SLASH ICI
             ->setUploadDir('public/uploads/products/')
             ->setUploadedFileNamePattern('[randomhash].[extension]')
-            ->hideOnIndex();
+            ->setRequired(false);
         yield BooleanField::new('isFeatured', 'À la une');
         yield BooleanField::new('isActive', 'Actif');
         yield DateTimeField::new('createdAt', 'Créé le')->hideOnForm();

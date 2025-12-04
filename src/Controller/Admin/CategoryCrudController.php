@@ -38,10 +38,10 @@ class CategoryCrudController extends AbstractCrudController
         yield SlugField::new('slug', 'Slug')->setTargetFieldName('name')->hideOnIndex();
         yield TextareaField::new('description', 'Description')->hideOnIndex();
         yield ImageField::new('image', 'Image')
-            ->setBasePath('uploads/categories/')
+            ->setBasePath('/uploads/categories/')  // Ajout du slash au début
             ->setUploadDir('public/uploads/categories/')
             ->setUploadedFileNamePattern('[randomhash].[extension]')
-            ->hideOnIndex();
+            ->setRequired(false);
         yield BooleanField::new('isActive', 'Active');
         yield DateTimeField::new('createdAt', 'Créé le')->hideOnForm();
     }
