@@ -54,7 +54,10 @@ class ProductCrudController extends AbstractCrudController
         yield TextareaField::new('description', 'Description')->hideOnIndex();
         // yield MoneyField::new('price', 'Prix')->setCurrency('EUR');
         // Remplacez MoneyField par NumberField
-        yield NumberField::new('price', 'Prix (€)')->setNumDecimals(2);
+        // Remplacez MoneyField par NumberField
+        yield NumberField::new('price', 'Prix (€)')
+            ->setNumDecimals(2)
+            ->setStoredAsFractional(false);
         yield IntegerField::new('stock', 'Stock');
         yield TextField::new('alcoholVolume', 'Degré d\'alcool')->hideOnIndex();
         yield TextField::new('volume', 'Volume')->hideOnIndex();
