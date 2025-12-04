@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Payment;
+use App\Entity\User;
+use App\Repository\ProductRepository;
 use App\Service\CartService;
 use App\Service\StripeService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,6 +24,21 @@ class CheckoutController extends AbstractController
         private StripeService $stripeService,
         private EntityManagerInterface $entityManager
     ) {
+    }
+
+    /**
+     * Récupérer l'utilisateur connecté avec le bon typage
+     */
+    private function getAuthenticatedUser(): User
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Vous devez être connecté pour accéder à cette page.');
+        }
+        
+        return $user;
     }
 
     /**
@@ -85,7 +102,6 @@ class CheckoutController extends AbstractController
             ];
         }
 
-        /** @var User $user */
         $user = $this->getAuthenticatedUser();
 
         // Créer la session Stripe
@@ -93,7 +109,7 @@ class CheckoutController extends AbstractController
             $stripeItems,
             $this->generateUrl('app_checkout_success', [
                 'orderId' => $order->getId()
-            ], UrlGeneratorInterface::ABSOLUTE_URL) . '?session_id={CHECKOUT_SESSION_ID}',  // ← CORRECTION ICI
+            ], UrlGeneratorInterface::ABSOLUTE_URL) . '?session_id={CHECKOUT_SESSION_ID}',
             $this->generateUrl('app_checkout_cancel', [
                 'orderId' => $order->getId()
             ], UrlGeneratorInterface::ABSOLUTE_URL),
@@ -115,51 +131,67 @@ class CheckoutController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
+        $user = $this->getAuthenticatedUser();
         $order = $this->entityManager->getRepository(Order::class)->find($orderId);
 
-        if (!$order || $order->getUser() !== $this->getUser()) {
+        if (!$order || $order->getUser() !== $user) {
             throw $this->createNotFoundException('Commande introuvable');
         }
 
         $sessionId = $request->query->get('session_id');
 
+        // Debug : afficher le session_id
+        if (!$sessionId) {
+            $this->addFlash('warning', 'Session ID manquant. Paiement peut-être en cours de traitement.');
+        }
+
         if ($sessionId && $order->getStatus() === Order::STATUS_PENDING) {
             // Récupérer les infos de la session Stripe
             $session = $this->stripeService->retrieveSession($sessionId);
 
-            if ($session && $session->payment_status === 'paid') {
-                // Créer le paiement
-                $payment = new Payment();
-                $payment->setOrder($order);
-                $payment->setPaymentMethod(Payment::METHOD_STRIPE);
-                $payment->setTransactionId($session->payment_intent);
-                $payment->setAmount((string) ($session->amount_total / 100));
-                $payment->setCurrency('EUR');
-                $payment->setStatus(Payment::STATUS_COMPLETED);
-                $payment->setPaidAt(new \DateTimeImmutable());
+            if ($session) {
+                // Debug : vérifier le statut du paiement
+                if ($session->payment_status === 'paid') {
+                    // Créer le paiement
+                    $payment = new Payment();
+                    $payment->setOrder($order);
+                    $payment->setPaymentMethod(Payment::METHOD_STRIPE);
+                    $payment->setTransactionId($session->payment_intent);
+                    $payment->setAmount((string) ($session->amount_total / 100));
+                    $payment->setCurrency('EUR');
+                    $payment->setStatus(Payment::STATUS_COMPLETED);
+                    $payment->setPaidAt(new \DateTimeImmutable());
 
-                $this->entityManager->persist($payment);
+                    $this->entityManager->persist($payment);
 
-                // Mettre à jour la commande
-                $order->setStatus(Order::STATUS_PAID);
-                $order->setPaidAt(new \DateTimeImmutable());
-                $order->setPayment($payment);
+                    // Mettre à jour la commande
+                    $order->setStatus(Order::STATUS_PAID);
+                    $order->setPaidAt(new \DateTimeImmutable());
+                    $order->setPayment($payment);
 
-                // Décrémenter le stock
-                foreach ($order->getOrderItems() as $orderItem) {
-                    $product = $orderItem->getProduct();
-                    if ($product) {
-                        $product->setStock($product->getStock() - $orderItem->getQuantity());
+                    // Décrémenter le stock
+                    foreach ($order->getOrderItems() as $orderItem) {
+                        $product = $orderItem->getProduct();
+                        if ($product) {
+                            $newStock = $product->getStock() - $orderItem->getQuantity();
+                            $product->setStock(max(0, $newStock)); // Ne pas avoir un stock négatif
+                        }
                     }
+
+                    $this->entityManager->flush();
+
+                    // Vider le panier
+                    $this->cartService->clear();
+
+                    $this->addFlash('success', '🎉 Paiement réussi ! Votre commande a été confirmée.');
+                } else {
+                    $this->addFlash('warning', 'Le paiement est en attente de confirmation. Statut : ' . $session->payment_status);
                 }
-
-                $this->entityManager->flush();
-
-                // Vider le panier
-                $this->cartService->clear();
-
-                $this->addFlash('success', '🎉 Paiement réussi ! Votre commande a été confirmée.');
+            } else {
+                $this->addFlash('error', 'Impossible de récupérer les informations de paiement.');
             }
+        } elseif ($order->getStatus() !== Order::STATUS_PENDING) {
+            $this->addFlash('info', 'Cette commande a déjà été traitée.');
         }
 
         return $this->render('checkout/success.html.twig', [
@@ -175,9 +207,10 @@ class CheckoutController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
+        $user = $this->getAuthenticatedUser();
         $order = $this->entityManager->getRepository(Order::class)->find($orderId);
 
-        if ($order && $order->getUser() === $this->getUser() && $order->getStatus() === Order::STATUS_PENDING) {
+        if ($order && $order->getUser() === $user && $order->getStatus() === Order::STATUS_PENDING) {
             $order->setStatus(Order::STATUS_CANCELLED);
             $this->entityManager->flush();
         }
@@ -192,8 +225,10 @@ class CheckoutController extends AbstractController
      */
     private function createOrder(): Order
     {
+        $user = $this->getAuthenticatedUser();
+        
         $order = new Order();
-        $order->setUser($this->getUser());
+        $order->setUser($user);
         $order->setStatus(Order::STATUS_PENDING);
         
         $total = 0;
@@ -208,15 +243,13 @@ class CheckoutController extends AbstractController
             $orderItem->calculateTotalPrice();
 
             $order->addOrderItem($orderItem);
-            $total += $orderItem->getTotalPrice();
+            $total += (float) $orderItem->getTotalPrice();
         }
 
         $order->setTotalAmount((string) $total);
 
         // TODO: Ajouter les adresses de livraison et facturation
         // Pour l'instant, on met des valeurs par défaut
-        /** @var User */
-        $user = $this->getUser();
         $order->setShippingFullName($user->getFullName());
         $order->setShippingStreet('Adresse temporaire');
         $order->setShippingPostalCode('00000');
