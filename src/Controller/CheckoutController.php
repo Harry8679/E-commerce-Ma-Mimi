@@ -85,6 +85,9 @@ class CheckoutController extends AbstractController
             ];
         }
 
+        /** @var User $user */
+        $user = $this->getUser();
+
         // Créer la session Stripe
         $session = $this->stripeService->createCheckoutSession(
             $stripeItems,
@@ -97,7 +100,7 @@ class CheckoutController extends AbstractController
             ], UrlGeneratorInterface::ABSOLUTE_URL),
             [
                 'order_id' => $order->getId(),
-                'customer_email' => $this->getUser()->getEmail(),
+                'customer_email' => $user->getEmail(),
             ]
         );
 
@@ -213,6 +216,7 @@ class CheckoutController extends AbstractController
 
         // TODO: Ajouter les adresses de livraison et facturation
         // Pour l'instant, on met des valeurs par défaut
+        /** @var User */
         $user = $this->getUser();
         $order->setShippingFullName($user->getFullName());
         $order->setShippingStreet('Adresse temporaire');
