@@ -10,6 +10,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\HasLifecycleCallbacks]
 class Address
 {
+    // Constantes pour les types d'adresse
+    public const TYPE_SHIPPING = 'shipping';
+    public const TYPE_BILLING = 'billing';
+    public const TYPE_BOTH = 'both';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -51,10 +56,10 @@ class Address
 
     #[ORM\Column(length: 50)]
     #[Assert\Choice(
-        choices: ['billing', 'shipping', 'both'],
+        choices: [self::TYPE_SHIPPING, self::TYPE_BILLING, self::TYPE_BOTH],
         message: 'Le type d\'adresse n\'est pas valide'
     )]
-    private ?string $type = 'both';
+    private ?string $type = self::TYPE_BOTH;
 
     #[ORM\Column]
     private bool $isDefault = false;
@@ -103,6 +108,35 @@ class Address
         $address .= "\n" . $this->country;
         
         return $address;
+    }
+
+    /**
+     * Obtenir le label du type d'adresse
+     */
+    public function getTypeLabel(): string
+    {
+        return match ($this->type) {
+            self::TYPE_SHIPPING => 'Livraison',
+            self::TYPE_BILLING => 'Facturation',
+            self::TYPE_BOTH => 'Livraison et Facturation',
+            default => 'Non défini',
+        };
+    }
+
+    /**
+     * Vérifier si l'adresse peut être utilisée pour la livraison
+     */
+    public function canBeUsedForShipping(): bool
+    {
+        return in_array($this->type, [self::TYPE_SHIPPING, self::TYPE_BOTH]);
+    }
+
+    /**
+     * Vérifier si l'adresse peut être utilisée pour la facturation
+     */
+    public function canBeUsedForBilling(): bool
+    {
+        return in_array($this->type, [self::TYPE_BILLING, self::TYPE_BOTH]);
     }
 
     public function getId(): ?int
