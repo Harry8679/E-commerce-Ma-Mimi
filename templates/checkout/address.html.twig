@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choix de l'adresse de livraison{% endblock %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto">
+    {# Progression #}
+    <div class="mb-8">
+        <div class="flex items-center justify-center">
+            <div class="flex items-center">
+                <div class="flex items-center text-amber-600">
+                    <div class="flex items-center justify-center w-10 h-10 bg-amber-600 text-white rounded-full font-bold">1</div>
+                    <span class="ml-2 font-semibold">Adresse</span>
+                </div>
+                <div class="w-24 h-1 bg-gray-300 mx-4"></div>
+                <div class="flex items-center text-gray-400">
+                    <div class="flex items-center justify-center w-10 h-10 bg-gray-300 text-white rounded-full font-bold">2</div>
+                    <span class="ml-2">Transporteur</span>
+                </div>
+                <div class="w-24 h-1 bg-gray-300 mx-4"></div>
+                <div class="flex items-center text-gray-400">
+                    <div class="flex items-center justify-center w-10 h-10 bg-gray-300 text-white rounded-full font-bold">3</div>
+                    <span class="ml-2">Paiement</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="text-4xl font-bold text-gray-900 mb-8">Choisissez votre adresse de livraison</h1>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+        {# Liste des adresses #}
+        <div class="lg:col-span-2">
+            <div class="space-y-4">
+                {% for address in addresses %}
+                    {% if address.canBeUsedForShipping %}
+                        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition {% if selectedAddress and selectedAddress.id == address.id %}ring-2 ring-amber-500{% endif %}">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <h3 class="text-lg font-bold text-gray-900">{{ address.fullName }}</h3>
+                                        
+                                        {% if address.isDefault %}
+                                            <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-semibold">
+                                                Par défaut
+                                            </span>
+                                        {% endif %}
+                                        
+                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                                            {{ address.typeLabel }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="text-gray-700 space-y-1">
+                                        {% if address.phone %}
+                                            <p class="text-sm">📞 {{ address.phone }}</p>
+                                        {% endif %}
+                                        <p>{{ address.street }}</p>
+                                        {% if address.streetComplement %}
+                                            <p>{{ address.streetComplement }}</p>
+                                        {% endif %}
+                                        <p>{{ address.postalCode }} {{ address.city }}</p>
+                                        <p>{{ address.country }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="ml-4">
+                                    <form method="post" action="{{ path('app_checkout_address_select', {id: address.id}) }}">
+                                        <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-semibold transition">
+                                            {% if selectedAddress and selectedAddress.id == address.id %}
+                                                ✓ Sélectionnée
+                                            {% else %}
+                                                Livrer ici
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {# Ajouter une nouvelle adresse #}
+            <div class="mt-6">
+                <a href="{{ path('app_account_address_new') }}" class="inline-flex items-center text-amber-600 hover:text-amber-700 font-semibold">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Ajouter une nouvelle adresse
+                </a>
+            </div>
+        </div>
+
+        {# Récapitulatif panier #}
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Récapitulatif</h2>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Sous-total</span>
+                        <span class="font-semibold">{{ cartTotal|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Livraison</span>
+                        <span class="text-gray-500">Calculée à l'étape suivante</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-sm text-gray-600">
+                        Sélectionnez une adresse de livraison pour continuer
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
