@@ -6,8 +6,10 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Payment;
 use App\Entity\User;
-use App\Repository\ProductRepository;
+use App\Repository\AddressRepository;
+use App\Repository\CarrierRepository;
 use App\Service\CartService;
+use App\Service\CheckoutService;
 use App\Service\StripeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,37 +23,143 @@ class CheckoutController extends AbstractController
 {
     public function __construct(
         private CartService $cartService,
+        private CheckoutService $checkoutService,
+        private AddressRepository $addressRepository,
+        private CarrierRepository $carrierRepository,
         private StripeService $stripeService,
         private EntityManagerInterface $entityManager
     ) {
     }
 
-    /**
-     * Récupérer l'utilisateur connecté avec le bon typage
-     */
     private function getAuthenticatedUser(): User
     {
         /** @var User $user */
         $user = $this->getUser();
         
         if (!$user instanceof User) {
-            throw $this->createAccessDeniedException('Vous devez être connecté pour accéder à cette page.');
+            throw $this->createAccessDeniedException('Vous devez être connecté.');
         }
         
         return $user;
     }
 
     /**
-     * Page de vérification avant paiement
+     * Étape 1 : Choix de l'adresse de livraison
      */
-    #[Route('/verifier', name: 'app_checkout_verify')]
-    public function verify(): Response
+    #[Route('/adresse', name: 'app_checkout_address')]
+    public function address(): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         if ($this->cartService->isEmpty()) {
             $this->addFlash('error', 'Votre panier est vide.');
             return $this->redirectToRoute('app_shop');
+        }
+
+        $user = $this->getAuthenticatedUser();
+        $addresses = $this->addressRepository->findBy(['user' => $user]);
+
+        if (empty($addresses)) {
+            $this->addFlash('warning', 'Vous devez d\'abord ajouter une adresse de livraison.');
+            return $this->redirectToRoute('app_account_address_new');
+        }
+
+        $selectedAddress = $this->checkoutService->getSelectedAddress();
+
+        return $this->render('checkout/address.html.twig', [
+            'addresses' => $addresses,
+            'selectedAddress' => $selectedAddress,
+            'cartTotal' => $this->cartService->getTotal(),
+        ]);
+    }
+
+    /**
+     * Sauvegarder l'adresse sélectionnée
+     */
+    #[Route('/adresse/choisir/{id}', name: 'app_checkout_address_select', methods: ['POST'])]
+    public function selectAddress(int $id): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $user = $this->getAuthenticatedUser();
+        $address = $this->addressRepository->find($id);
+
+        if (!$address || $address->getUser() !== $user) {
+            throw $this->createNotFoundException('Adresse introuvable');
+        }
+
+        $this->checkoutService->setAddress($id);
+        $this->addFlash('success', '✅ Adresse de livraison sélectionnée.');
+
+        return $this->redirectToRoute('app_checkout_carrier');
+    }
+
+    /**
+     * Étape 2 : Choix du transporteur
+     */
+    #[Route('/transporteur', name: 'app_checkout_carrier')]
+    public function carrier(): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        if ($this->cartService->isEmpty()) {
+            $this->addFlash('error', 'Votre panier est vide.');
+            return $this->redirectToRoute('app_shop');
+        }
+
+        $selectedAddress = $this->checkoutService->getSelectedAddress();
+        if (!$selectedAddress) {
+            $this->addFlash('warning', 'Veuillez d\'abord choisir une adresse de livraison.');
+            return $this->redirectToRoute('app_checkout_address');
+        }
+
+        $carriers = $this->carrierRepository->findActiveCarriers();
+        $selectedCarrier = $this->checkoutService->getSelectedCarrier();
+
+        return $this->render('checkout/carrier.html.twig', [
+            'carriers' => $carriers,
+            'selectedCarrier' => $selectedCarrier,
+            'selectedAddress' => $selectedAddress,
+            'cartTotal' => $this->cartService->getTotal(),
+        ]);
+    }
+
+    /**
+     * Sauvegarder le transporteur sélectionné
+     */
+    #[Route('/transporteur/choisir/{id}', name: 'app_checkout_carrier_select', methods: ['POST'])]
+    public function selectCarrier(int $id): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $carrier = $this->carrierRepository->find($id);
+
+        if (!$carrier || !$carrier->isActive()) {
+            throw $this->createNotFoundException('Transporteur introuvable');
+        }
+
+        $this->checkoutService->setCarrier($id);
+        $this->addFlash('success', '✅ Transporteur sélectionné.');
+
+        return $this->redirectToRoute('app_checkout_summary');
+    }
+
+    /**
+     * Étape 3 : Récapitulatif et paiement
+     */
+    #[Route('/recapitulatif', name: 'app_checkout_summary')]
+    public function summary(): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        if ($this->cartService->isEmpty()) {
+            $this->addFlash('error', 'Votre panier est vide.');
+            return $this->redirectToRoute('app_shop');
+        }
+
+        if (!$this->checkoutService->isComplete()) {
+            $this->addFlash('warning', 'Veuillez compléter toutes les étapes.');
+            return $this->redirectToRoute('app_checkout_address');
         }
 
         // Vérifier le stock
@@ -64,11 +172,20 @@ class CheckoutController extends AbstractController
         }
 
         $cartItems = $this->cartService->getCartWithDetails();
-        $total = $this->cartService->getTotal();
+        $cartTotal = $this->cartService->getTotal();
+        $selectedAddress = $this->checkoutService->getSelectedAddress();
+        $selectedCarrier = $this->checkoutService->getSelectedCarrier();
+        
+        $shippingCost = (float) $selectedCarrier->getPrice();
+        $totalAmount = $cartTotal + $shippingCost;
 
-        return $this->render('checkout/verify.html.twig', [
+        return $this->render('checkout/summary.html.twig', [
             'cartItems' => $cartItems,
-            'total' => $total,
+            'cartTotal' => $cartTotal,
+            'selectedAddress' => $selectedAddress,
+            'selectedCarrier' => $selectedCarrier,
+            'shippingCost' => $shippingCost,
+            'totalAmount' => $totalAmount,
         ]);
     }
 
@@ -85,7 +202,12 @@ class CheckoutController extends AbstractController
             return $this->redirectToRoute('app_shop');
         }
 
-        // Créer la commande temporaire
+        if (!$this->checkoutService->isComplete()) {
+            $this->addFlash('warning', 'Veuillez compléter toutes les étapes.');
+            return $this->redirectToRoute('app_checkout_address');
+        }
+
+        // Créer la commande
         $order = $this->createOrder();
 
         // Préparer les items pour Stripe
@@ -101,6 +223,15 @@ class CheckoutController extends AbstractController
                     : [],
             ];
         }
+
+        // Ajouter les frais de livraison
+        $carrier = $this->checkoutService->getSelectedCarrier();
+        $stripeItems[] = [
+            'name' => 'Livraison - ' . $carrier->getName(),
+            'description' => $carrier->getDeliveryTime(),
+            'price' => $carrier->getPrice(),
+            'quantity' => 1,
+        ];
 
         $user = $this->getAuthenticatedUser();
 
@@ -119,7 +250,6 @@ class CheckoutController extends AbstractController
             ]
         );
 
-        // Rediriger vers Stripe Checkout
         return $this->redirect($session->url, 303);
     }
 
@@ -140,58 +270,41 @@ class CheckoutController extends AbstractController
 
         $sessionId = $request->query->get('session_id');
 
-        // Debug : afficher le session_id
-        if (!$sessionId) {
-            $this->addFlash('warning', 'Session ID manquant. Paiement peut-être en cours de traitement.');
-        }
-
         if ($sessionId && $order->getStatus() === Order::STATUS_PENDING) {
-            // Récupérer les infos de la session Stripe
             $session = $this->stripeService->retrieveSession($sessionId);
 
-            if ($session) {
-                // Debug : vérifier le statut du paiement
-                if ($session->payment_status === 'paid') {
-                    // Créer le paiement
-                    $payment = new Payment();
-                    $payment->setOrder($order);
-                    $payment->setPaymentMethod(Payment::METHOD_STRIPE);
-                    $payment->setTransactionId($session->payment_intent);
-                    $payment->setAmount((string) ($session->amount_total / 100));
-                    $payment->setCurrency('EUR');
-                    $payment->setStatus(Payment::STATUS_COMPLETED);
-                    $payment->setPaidAt(new \DateTimeImmutable());
+            if ($session && $session->payment_status === 'paid') {
+                $payment = new Payment();
+                $payment->setOrder($order);
+                $payment->setPaymentMethod(Payment::METHOD_STRIPE);
+                $payment->setTransactionId($session->payment_intent);
+                $payment->setAmount((string) ($session->amount_total / 100));
+                $payment->setCurrency('EUR');
+                $payment->setStatus(Payment::STATUS_COMPLETED);
+                $payment->setPaidAt(new \DateTimeImmutable());
 
-                    $this->entityManager->persist($payment);
+                $this->entityManager->persist($payment);
 
-                    // Mettre à jour la commande
-                    $order->setStatus(Order::STATUS_PAID);
-                    $order->setPaidAt(new \DateTimeImmutable());
-                    $order->setPayment($payment);
+                $order->setStatus(Order::STATUS_PAID);
+                $order->setPaidAt(new \DateTimeImmutable());
+                $order->setPayment($payment);
 
-                    // Décrémenter le stock
-                    foreach ($order->getOrderItems() as $orderItem) {
-                        $product = $orderItem->getProduct();
-                        if ($product) {
-                            $newStock = $product->getStock() - $orderItem->getQuantity();
-                            $product->setStock(max(0, $newStock)); // Ne pas avoir un stock négatif
-                        }
+                foreach ($order->getOrderItems() as $orderItem) {
+                    $product = $orderItem->getProduct();
+                    if ($product) {
+                        $newStock = $product->getStock() - $orderItem->getQuantity();
+                        $product->setStock(max(0, $newStock));
                     }
-
-                    $this->entityManager->flush();
-
-                    // Vider le panier
-                    $this->cartService->clear();
-
-                    $this->addFlash('success', '🎉 Paiement réussi ! Votre commande a été confirmée.');
-                } else {
-                    $this->addFlash('warning', 'Le paiement est en attente de confirmation. Statut : ' . $session->payment_status);
                 }
-            } else {
-                $this->addFlash('error', 'Impossible de récupérer les informations de paiement.');
+
+                $this->entityManager->flush();
+
+                // Vider le panier et le checkout
+                $this->cartService->clear();
+                $this->checkoutService->clear();
+
+                $this->addFlash('success', '🎉 Paiement réussi ! Votre commande a été confirmée.');
             }
-        } elseif ($order->getStatus() !== Order::STATUS_PENDING) {
-            $this->addFlash('info', 'Cette commande a déjà été traitée.');
         }
 
         return $this->render('checkout/success.html.twig', [
@@ -215,9 +328,9 @@ class CheckoutController extends AbstractController
             $this->entityManager->flush();
         }
 
-        $this->addFlash('warning', 'Le paiement a été annulé. Votre panier est toujours disponible.');
+        $this->addFlash('warning', 'Le paiement a été annulé.');
 
-        return $this->redirectToRoute('app_cart_index');
+        return $this->redirectToRoute('app_checkout_summary');
     }
 
     /**
@@ -226,6 +339,8 @@ class CheckoutController extends AbstractController
     private function createOrder(): Order
     {
         $user = $this->getAuthenticatedUser();
+        $address = $this->checkoutService->getSelectedAddress();
+        $carrier = $this->checkoutService->getSelectedCarrier();
         
         $order = new Order();
         $order->setUser($user);
@@ -246,21 +361,30 @@ class CheckoutController extends AbstractController
             $total += (float) $orderItem->getTotalPrice();
         }
 
+        // Ajouter le transporteur
+        $order->setCarrier($carrier);
+        $order->copyCarrierInfo();
+        $total += (float) $carrier->getPrice();
+
         $order->setTotalAmount((string) $total);
 
-        // TODO: Ajouter les adresses de livraison et facturation
-        // Pour l'instant, on met des valeurs par défaut
-        $order->setShippingFullName($user->getFullName());
-        $order->setShippingStreet('Adresse temporaire');
-        $order->setShippingPostalCode('00000');
-        $order->setShippingCity('Ville');
-        $order->setShippingCountry('France');
+        // Adresse de livraison
+        $order->setShippingFullName($address->getFullName());
+        $order->setShippingPhone($address->getPhone());
+        $order->setShippingStreet($address->getStreet());
+        $order->setShippingStreetComplement($address->getStreetComplement());
+        $order->setShippingPostalCode($address->getPostalCode());
+        $order->setShippingCity($address->getCity());
+        $order->setShippingCountry($address->getCountry());
 
-        $order->setBillingFullName($user->getFullName());
-        $order->setBillingStreet('Adresse temporaire');
-        $order->setBillingPostalCode('00000');
-        $order->setBillingCity('Ville');
-        $order->setBillingCountry('France');
+        // Adresse de facturation (même que livraison pour l'instant)
+        $order->setBillingFullName($address->getFullName());
+        $order->setBillingPhone($address->getPhone());
+        $order->setBillingStreet($address->getStreet());
+        $order->setBillingStreetComplement($address->getStreetComplement());
+        $order->setBillingPostalCode($address->getPostalCode());
+        $order->setBillingCity($address->getCity());
+        $order->setBillingCountry($address->getCountry());
 
         $this->entityManager->persist($order);
         $this->entityManager->flush();
