@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choix du transporteur{% endblock %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto">
+    {# Progression #}
+    <div class="mb-8">
+        <div class="flex items-center justify-center">
+            <div class="flex items-center">
+                <div class="flex items-center text-green-600">
+                    <div class="flex items-center justify-center w-10 h-10 bg-green-600 text-white rounded-full font-bold">✓</div>
+                    <span class="ml-2 font-semibold">Adresse</span>
+                </div>
+                <div class="w-24 h-1 bg-green-600 mx-4"></div>
+                <div class="flex items-center text-amber-600">
+                    <div class="flex items-center justify-center w-10 h-10 bg-amber-600 text-white rounded-full font-bold">2</div>
+                    <span class="ml-2 font-semibold">Transporteur</span>
+                </div>
+                <div class="w-24 h-1 bg-gray-300 mx-4"></div>
+                <div class="flex items-center text-gray-400">
+                    <div class="flex items-center justify-center w-10 h-10 bg-gray-300 text-white rounded-full font-bold">3</div>
+                    <span class="ml-2">Paiement</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="text-4xl font-bold text-gray-900 mb-8">Choisissez votre mode de livraison</h1>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+        {# Liste des transporteurs #}
+        <div class="lg:col-span-2">
+            {# Adresse sélectionnée #}
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-green-900 mb-1">Livraison à :</h3>
+                        <p class="text-sm text-green-800">
+                            <strong>{{ selectedAddress.fullName }}</strong><br>
+                            {{ selectedAddress.street }}<br>
+                            {{ selectedAddress.postalCode }} {{ selectedAddress.city }}
+                        </p>
+                        <a href="{{ path('app_checkout_address') }}" class="text-sm text-green-700 hover:text-green-800 font-semibold mt-2 inline-block">
+                            Modifier l'adresse →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {# Liste des transporteurs #}
+            <div class="space-y-4">
+                {% for carrier in carriers %}
+                    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition {% if selectedCarrier and selectedCarrier.id == carrier.id %}ring-2 ring-amber-500{% endif %}">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start gap-4 flex-1">
+                                {# Logo #}
+                                {% if carrier.logo %}
+                                    <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                        <img src="/uploads/carriers/{{ carrier.logo }}" 
+                                             alt="{{ carrier.name }}" 
+                                             class="w-full h-full object-contain">
+                                    </div>
+                                {% else %}
+                                    <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-3xl">🚚</span>
+                                    </div>
+                                {% endif %}
+
+                                {# Informations #}
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-1">{{ carrier.name }}</h3>
+                                    <p class="text-sm text-gray-600 mb-2">{{ carrier.description }}</p>
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <span>{{ carrier.deliveryTime }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Prix et bouton #}
+                            <div class="ml-4 text-right flex-shrink-0">
+                                <p class="text-2xl font-bold text-amber-700 mb-3">
+                                    {{ carrier.price|number_format(2, ',', ' ') }} €
+                                </p>
+                                <form method="post" action="{{ path('app_checkout_carrier_select', {id: carrier.id}) }}">
+                                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-semibold transition whitespace-nowrap">
+                                        {% if selectedCarrier and selectedCarrier.id == carrier.id %}
+                                            ✓ Sélectionné
+                                        {% else %}
+                                            Choisir
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# Récapitulatif #}
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Récapitulatif</h2>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Sous-total</span>
+                        <span class="font-semibold">{{ cartTotal|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                    
+                    {% if selectedCarrier %}
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Livraison</span>
+                            <span class="font-semibold">{{ selectedCarrier.price|number_format(2, ',', ' ') }} €</span>
+                        </div>
+                        <hr class="my-4">
+                        <div class="flex justify-between text-lg">
+                            <span class="font-bold text-gray-900">Total</span>
+                            <span class="font-bold text-amber-700">{{ (cartTotal + selectedCarrier.price)|number_format(2, ',', ' ') }} €</span>
+                        </div>
+                    {% else %}
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Livraison</span>
+                            <span class="text-gray-500">À sélectionner</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-sm text-gray-600">
+                        Choisissez un mode de livraison pour continuer
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
