@@ -1,20 +1,139 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ProfileController!{% endblock %}
+{% block title %}Mon profil{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-900 mb-8">Mon profil</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <div class="grid md:grid-cols-2 gap-6">
+        {# Informations personnelles #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Informations personnelles</h2>
+                <a href="{{ path('app_profile_edit') }}" class="text-amber-600 hover:text-amber-700 font-semibold text-sm">
+                    Modifier
+                </a>
+            </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/admin/Desktop/Programming/EBANG_MEZUI/Mariam-Mimi/e-commerce-rhum/src/Controller/ProfileController.php</code></li>
-        <li>Your template at <code>/Users/admin/Desktop/Programming/EBANG_MEZUI/Mariam-Mimi/e-commerce-rhum/templates/profile/index.html.twig</code></li>
-    </ul>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">Nom complet</label>
+                    <p class="text-lg text-gray-900">{{ user.fullName }}</p>
+                </div>
+
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">Email</label>
+                    <p class="text-lg text-gray-900">{{ user.email }}</p>
+                </div>
+
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">Téléphone</label>
+                    <p class="text-lg text-gray-900">{{ user.phone ?? 'Non renseigné' }}</p>
+                </div>
+
+                <div>
+                    <label class="text-sm font-semibold text-gray-600">Compte créé le</label>
+                    <p class="text-lg text-gray-900">{{ user.createdAt|date('d/m/Y') }}</p>
+                </div>
+            </div>
+        </div>
+
+        {# Sécurité #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Sécurité</h2>
+
+            <div class="space-y-4">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                        <div>
+                            <p class="font-semibold text-green-900">Compte vérifié</p>
+                            <p class="text-sm text-green-700">Votre compte est sécurisé</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 pt-4">
+                    <h3 class="font-semibold text-gray-900 mb-2">Mot de passe</h3>
+                    <p class="text-sm text-gray-600 mb-4">Dernière modification : 
+                        {% if user.updatedAt %}
+                            {{ user.updatedAt|date('d/m/Y') }}
+                        {% else %}
+                            Jamais modifié
+                        {% endif %}
+                    </p>
+                    <a href="{{ path('app_profile_change_password') }}" class="inline-flex items-center bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold transition">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                        Changer mon mot de passe
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {# Actions rapides #}
+        <div class="bg-white rounded-lg shadow-md p-6 md:col-span-2">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Actions rapides</h2>
+
+            <div class="grid md:grid-cols-3 gap-4">
+                <a href="{{ path('app_account_orders') }}" class="flex items-center p-4 bg-amber-50 hover:bg-amber-100 rounded-lg transition">
+                    <svg class="w-8 h-8 text-amber-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-gray-900">Mes commandes</p>
+                        <p class="text-sm text-gray-600">Voir l'historique</p>
+                    </div>
+                </a>
+
+                <a href="{{ path('app_account_addresses') }}" class="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition">
+                    <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-gray-900">Mes adresses</p>
+                        <p class="text-sm text-gray-600">Gérer mes adresses</p>
+                    </div>
+                </a>
+
+                <a href="{{ path('app_shop') }}" class="flex items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition">
+                    <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-gray-900">Boutique</p>
+                        <p class="text-sm text-gray-600">Continuer mes achats</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {# Statistiques #}
+        <div class="bg-gradient-to-br from-amber-600 to-amber-700 rounded-lg shadow-md p-6 text-white md:col-span-2">
+            <h2 class="text-2xl font-bold mb-6">Vos statistiques</h2>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                    <p class="text-amber-100 text-sm mb-1">Commandes</p>
+                    <p class="text-3xl font-bold">{{ user.orders|length }}</p>
+                </div>
+
+                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                    <p class="text-amber-100 text-sm mb-1">Adresses</p>
+                    <p class="text-3xl font-bold">{{ user.addresses|length }}</p>
+                </div>
+
+                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                    <p class="text-amber-100 text-sm mb-1">Membre depuis</p>
+                    <p class="text-xl font-bold">{{ user.createdAt|date('M Y') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
