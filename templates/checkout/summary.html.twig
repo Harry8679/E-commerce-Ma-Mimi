@@ -1,0 +1,200 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Récapitulatif de la commande{% endblock %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto">
+    {# Progression #}
+    <div class="mb-8">
+        <div class="flex items-center justify-center">
+            <div class="flex items-center">
+                <div class="flex items-center text-green-600">
+                    <div class="flex items-center justify-center w-10 h-10 bg-green-600 text-white rounded-full font-bold">✓</div>
+                    <span class="ml-2 font-semibold">Adresse</span>
+                </div>
+                <div class="w-24 h-1 bg-green-600 mx-4"></div>
+                <div class="flex items-center text-green-600">
+                    <div class="flex items-center justify-center w-10 h-10 bg-green-600 text-white rounded-full font-bold">✓</div>
+                    <span class="ml-2 font-semibold">Transporteur</span>
+                </div>
+                <div class="w-24 h-1 bg-green-600 mx-4"></div>
+                <div class="flex items-center text-amber-600">
+                    <div class="flex items-center justify-center w-10 h-10 bg-amber-600 text-white rounded-full font-bold">3</div>
+                    <span class="ml-2 font-semibold">Paiement</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="text-4xl font-bold text-gray-900 mb-8">Récapitulatif de votre commande</h1>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+        {# Détails de la commande #}
+        <div class="lg:col-span-2 space-y-6">
+            {# Articles commandés #}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900">Articles ({{ cartItems|length }})</h2>
+                </div>
+                
+                <div class="p-6">
+                    <div class="space-y-4">
+                        {% for item in cartItems %}
+                            <div class="flex items-center gap-4 pb-4 border-b border-gray-200 last:border-0">
+                                <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                    {% if item.product.image %}
+                                        <img src="/uploads/products/{{ item.product.image }}" 
+                                             alt="{{ item.product.name }}" 
+                                             class="w-full h-full object-cover">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            <span class="text-3xl">🥃</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-900">{{ item.product.name }}</h3>
+                                    <p class="text-sm text-gray-600">{{ item.product.category.name }}</p>
+                                    <p class="text-sm text-gray-600">Quantité : {{ item.quantity }}</p>
+                                </div>
+                                
+                                <div class="text-right">
+                                    <p class="font-bold text-amber-700">
+                                        {{ item.subtotal|number_format(2, ',', ' ') }} €
+                                    </p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {# Adresse de livraison #}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900">Adresse de livraison</h2>
+                    <a href="{{ path('app_checkout_address') }}" class="text-sm text-amber-600 hover:text-amber-700 font-semibold">
+                        Modifier
+                    </a>
+                </div>
+                
+                <div class="p-6">
+                    <div class="text-gray-700">
+                        <p class="font-semibold text-lg">{{ selectedAddress.fullName }}</p>
+                        {% if selectedAddress.phone %}
+                            <p class="text-sm">📞 {{ selectedAddress.phone }}</p>
+                        {% endif %}
+                        <p class="mt-2">{{ selectedAddress.street }}</p>
+                        {% if selectedAddress.streetComplement %}
+                            <p>{{ selectedAddress.streetComplement }}</p>
+                        {% endif %}
+                        <p>{{ selectedAddress.postalCode }} {{ selectedAddress.city }}</p>
+                        <p>{{ selectedAddress.country }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {# Mode de livraison #}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900">Mode de livraison</h2>
+                    <a href="{{ path('app_checkout_carrier') }}" class="text-sm text-amber-600 hover:text-amber-700 font-semibold">
+                        Modifier
+                    </a>
+                </div>
+                
+                <div class="p-6">
+                    <div class="flex items-center gap-4">
+                        {% if selectedCarrier.logo %}
+                            <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                <img src="/uploads/carriers/{{ selectedCarrier.logo }}" 
+                                     alt="{{ selectedCarrier.name }}" 
+                                     class="w-full h-full object-contain">
+                            </div>
+                        {% else %}
+                            <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <span class="text-3xl">🚚</span>
+                            </div>
+                        {% endif %}
+
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-900">{{ selectedCarrier.name }}</h3>
+                            <p class="text-sm text-gray-600">{{ selectedCarrier.description }}</p>
+                            <p class="text-sm text-gray-600">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                {{ selectedCarrier.deliveryTime }}
+                            </p>
+                        </div>
+
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-amber-700">
+                                {{ selectedCarrier.price|number_format(2, ',', ' ') }} €
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Récapitulatif et paiement #}
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">Total</h2>
+
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Sous-total</span>
+                        <span class="font-semibold">{{ cartTotal|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                    
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Livraison</span>
+                        <span class="font-semibold">{{ shippingCost|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="flex justify-between text-lg">
+                        <span class="font-bold text-gray-900">Total TTC</span>
+                        <span class="font-bold text-amber-700">{{ totalAmount|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-gray-900 mb-3">Mode de paiement</h3>
+
+                {# Bouton Stripe #}
+                <form method="post" action="{{ path('app_checkout_stripe') }}" class="mb-3">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/>
+                        </svg>
+                        Payer par Carte Bancaire
+                    </button>
+                </form>
+
+                {# Bouton PayPal (désactivé pour l'instant) #}
+                <button disabled class="w-full bg-gray-300 text-gray-500 font-bold py-3 rounded-lg cursor-not-allowed flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .923-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.471z"/>
+                    </svg>
+                    PayPal (Bientôt disponible)
+                </button>
+
+                <p class="text-xs text-gray-600 text-center mt-4">
+                    🔒 Paiement 100% sécurisé
+                </p>
+
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-xs text-gray-600">
+                        En validant votre commande, vous acceptez nos 
+                        <a href="#" class="text-amber-600 hover:text-amber-700">conditions générales de vente</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
