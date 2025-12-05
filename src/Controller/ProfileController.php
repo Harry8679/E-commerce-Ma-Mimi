@@ -89,26 +89,25 @@ class ProfileController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+            $currentPassword = $form->get('currentPassword')->getData();
+            $newPassword = $form->get('newPassword')->getData();
 
             // Vérifier l'ancien mot de passe
-            if (!$this->passwordHasher->isPasswordValid($user, $data['currentPassword'])) {
+            if (!$this->passwordHasher->isPasswordValid($user, $currentPassword)) {
                 $this->addFlash('error', '❌ Le mot de passe actuel est incorrect.');
                 return $this->redirectToRoute('app_profile_change_password');
             }
 
             // Mettre à jour le mot de passe
-            $hashedPassword = $this->passwordHasher->hashPassword(
-                $user,
-                $data['newPassword']
-            );
+            $hashedPassword = $this->passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
+
             $this->entityManager->flush();
 
             $this->addFlash('success', '✅ Votre mot de passe a été modifié avec succès.');
-
             return $this->redirectToRoute('app_profile');
         }
+
 
         return $this->render('profile/change_password.html.twig', [
             'form' => $form,
