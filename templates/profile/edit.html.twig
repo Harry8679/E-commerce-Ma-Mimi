@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-6">
+        <a href="{{ path('app_profile') }}" class="text-amber-600 hover:text-amber-700 font-semibold text-sm inline-flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Retour au profil
+        </a>
+    </div>
+
+    <h1 class="text-4xl font-bold text-gray-900 mb-8">Modifier mon profil</h1>
+
+    <div class="bg-white rounded-lg shadow-md p-8">
+        {{ form_start(form) }}
+        
+        <div class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    {{ form_label(form.firstName, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-700 mb-2'}}) }}
+                    {{ form_widget(form.firstName) }}
+                    {{ form_errors(form.firstName) }}
+                </div>
+
+                <div>
+                    {{ form_label(form.lastName, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-700 mb-2'}}) }}
+                    {{ form_widget(form.lastName) }}
+                    {{ form_errors(form.lastName) }}
+                </div>
+            </div>
+
+            <div>
+                {{ form_label(form.email, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-700 mb-2'}}) }}
+                {{ form_widget(form.email) }}
+                {{ form_errors(form.email) }}
+                <p class="text-sm text-gray-600 mt-1">
+                    ⚠️ La modification de votre email nécessitera une nouvelle vérification
+                </p>
+            </div>
+
+            <div>
+                {{ form_label(form.phone, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-700 mb-2'}}) }}
+                {{ form_widget(form.phone) }}
+                {{ form_errors(form.phone) }}
+            </div>
+        </div>
+
+        <div class="mt-8 flex gap-4">
+            <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-lg transition">
+                Enregistrer les modifications
+            </button>
+            <a href="{{ path('app_profile') }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-lg transition text-center">
+                Annuler
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
