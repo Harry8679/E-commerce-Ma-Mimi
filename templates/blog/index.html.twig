@@ -1,0 +1,189 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Blog - Dikukuli{% endblock %}
+
+{% block body %}
+<div class="bg-gradient-to-br from-amber-50 to-amber-100 -mt-8 -mx-4 px-4 py-12 mb-8">
+    <div class="max-w-7xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-amber-900 mb-2">📝 Notre Blog</h1>
+        <p class="text-lg text-amber-800">Découvrez nos articles, conseils et actualités sur l'univers du rhum</p>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-4 gap-8">
+    {# Sidebar #}
+    <aside class="lg:col-span-1">
+        {# Recherche #}
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">🔍 Rechercher</h3>
+            <form method="get" action="{{ path('app_blog_index') }}">
+                <div class="flex gap-2">
+                    <input type="text" 
+                           name="search" 
+                           value="{{ search }}"
+                           placeholder="Rechercher..." 
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500">
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {# Catégories #}
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">📂 Catégories</h3>
+            <ul class="space-y-2">
+                <li>
+                    <a href="{{ path('app_blog_index') }}" 
+                       class="flex items-center justify-between px-3 py-2 rounded-lg transition {{ not selectedCategory ? 'bg-amber-100 text-amber-800 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                        <span>Tous les articles</span>
+                    </a>
+                </li>
+                {% for category in categories %}
+                    <li>
+                        <a href="{{ path('app_blog_index', {category: category.id}) }}" 
+                           class="flex items-center justify-between px-3 py-2 rounded-lg transition {{ selectedCategory == category.id ? 'bg-amber-100 text-amber-800 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                            <span>{{ category.name }}</span>
+                            <span class="text-xs px-2 py-1 rounded-full" style="background-color: {{ category.color }}20; color: {{ category.color }}">
+                                {{ category.posts|length }}
+                            </span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {# Articles populaires #}
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">🔥 Articles populaires</h3>
+            <div class="space-y-4">
+                {% for popularPost in popularPosts %}
+                    <a href="{{ path('app_blog_show', {slug: popularPost.slug}) }}" class="block group">
+                        <h4 class="font-semibold text-sm text-gray-900 group-hover:text-amber-700 line-clamp-2 mb-1">
+                            {{ popularPost.title }}
+                        </h4>
+                        <div class="flex items-center text-xs text-gray-600">
+                            <span>❤️ {{ popularPost.likesCount }}</span>
+                            <span class="mx-2">•</span>
+                            <span>💬 {{ popularPost.commentsCount }}</span>
+                        </div>
+                    </a>
+                    {% if not loop.last %}
+                        <hr class="border-gray-200">
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        {# Articles récents #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">📅 Articles récents</h3>
+            <div class="space-y-3">
+                {% for recentPost in recentPosts %}
+                    <a href="{{ path('app_blog_show', {slug: recentPost.slug}) }}" class="block text-sm text-gray-700 hover:text-amber-700 line-clamp-2">
+                        {{ recentPost.title }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </aside>
+
+    {# Articles #}
+    <main class="lg:col-span-3">
+        {% if posts is empty %}
+            <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                <div class="text-6xl mb-4">📭</div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Aucun article trouvé</h3>
+                <p class="text-gray-600 mb-6">Essayez de modifier vos filtres de recherche</p>
+                <a href="{{ path('app_blog_index') }}" class="inline-block bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+                    Voir tous les articles
+                </a>
+            </div>
+        {% else %}
+            <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                {% for post in posts %}
+                    <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition group">
+                        {# Image #}
+                        <a href="{{ path('app_blog_show', {slug: post.slug}) }}" class="block relative overflow-hidden" style="padding-top: 60%;">
+                            {% if post.featuredImage %}
+                                <img src="/uploads/blog/{{ post.featuredImage }}" 
+                                     alt="{{ post.title }}" 
+                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                            {% else %}
+                                <div class="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                                    <span class="text-6xl">📝</span>
+                                </div>
+                            {% endif %}
+                            
+                            {# Catégorie badge #}
+                            <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold text-white" style="background-color: {{ post.category.color }}">
+                                {{ post.category.name }}
+                            </span>
+                        </a>
+
+                        {# Contenu #}
+                        <div class="p-5">
+                            <a href="{{ path('app_blog_show', {slug: post.slug}) }}">
+                                <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-amber-700 transition line-clamp-2">
+                                    {{ post.title }}
+                                </h3>
+                            </a>
+                            
+                            <p class="text-sm text-gray-600 mb-4 line-clamp-3">
+                                {{ post.excerpt }}
+                            </p>
+
+                            <div class="flex items-center justify-between text-sm text-gray-600">
+                                <div class="flex items-center space-x-3">
+                                    <span>❤️ {{ post.likesCount }}</span>
+                                    <span>💬 {{ post.commentsCount }}</span>
+                                </div>
+                                <span>{{ post.publishedAt|date('d/m/Y') }}</span>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            {# Pagination #}
+            {% if totalPages > 1 %}
+                <div class="flex justify-center">
+                    <nav class="flex items-center space-x-2">
+                        {% if currentPage > 1 %}
+                            <a href="{{ path('app_blog_index', {page: currentPage - 1, category: selectedCategory, search: search}) }}" 
+                               class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                                ← Précédent
+                            </a>
+                        {% endif %}
+
+                        {% for page in 1..totalPages %}
+                            {% if page == currentPage %}
+                                <span class="px-4 py-2 bg-amber-600 text-white rounded-lg font-semibold">
+                                    {{ page }}
+                                </span>
+                            {% elseif page == 1 or page == totalPages or (page >= currentPage - 1 and page <= currentPage + 1) %}
+                                <a href="{{ path('app_blog_index', {page: page, category: selectedCategory, search: search}) }}" 
+                                   class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                                    {{ page }}
+                                </a>
+                            {% elseif page == currentPage - 2 or page == currentPage + 2 %}
+                                <span class="px-2">...</span>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if currentPage < totalPages %}
+                            <a href="{{ path('app_blog_index', {page: currentPage + 1, category: selectedCategory, search: search}) }}" 
+                               class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                                Suivant →
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

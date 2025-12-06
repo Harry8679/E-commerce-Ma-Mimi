@@ -76,11 +76,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
     private Collection $orders;
 
+    #[ORM\OneToMany(targetEntity: BlogPost::class, mappedBy: 'author')]
+    private Collection $blogPosts;
+
+    #[ORM\OneToMany(targetEntity: BlogComment::class, mappedBy: 'author', orphanRemoval: true)]
+    private Collection $blogComments;
+
+    #[ORM\OneToMany(targetEntity: BlogLike::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $blogLikes;
+
     public function __construct()
     {
         $this->addresses = new ArrayCollection();
         $this->orders = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+        $this->blogPosts = new ArrayCollection();
+        $this->blogComments = new ArrayCollection();
+        $this->blogLikes = new ArrayCollection();
     }
 
     #[ORM\PreUpdate]
@@ -267,5 +279,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __toString(): string
     {
         return $this->getFullName() ?? $this->email ?? 'Utilisateur';
+    }
+
+    /**
+     * @return Collection<int, BlogPost>
+     */
+    public function getBlogPosts(): Collection
+    {
+        return $this->blogPosts;
+    }
+
+    /**
+     * @return Collection<int, BlogComment>
+     */
+    public function getBlogComments(): Collection
+    {
+        return $this->blogComments;
+    }
+
+    /**
+     * @return Collection<int, BlogLike>
+     */
+    public function getBlogLikes(): Collection
+    {
+        return $this->blogLikes;
     }
 }

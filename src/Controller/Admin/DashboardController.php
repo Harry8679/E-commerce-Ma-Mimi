@@ -3,6 +3,9 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Address;
+use App\Entity\BlogCategory;
+use App\Entity\BlogComment;
+use App\Entity\BlogPost;
 use App\Entity\Carrier;
 use App\Entity\Category;
 use App\Entity\Invoice;
@@ -54,5 +57,10 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Retour au site');
         yield MenuItem::linkToRoute('Voir le site', 'fas fa-eye', 'app_home');
         yield MenuItem::linkToLogout('Déconnexion', 'fas fa-sign-out-alt');
+
+        yield MenuItem::section('Blog');
+        yield MenuItem::linkToCrud('Articles', 'fas fa-newspaper', BlogPost::class);
+        yield MenuItem::linkToCrud('Catégories', 'fas fa-folder', BlogCategory::class);
+        yield MenuItem::linkToCrud('Commentaires', 'fas fa-comments', BlogComment::class);
     }
 }

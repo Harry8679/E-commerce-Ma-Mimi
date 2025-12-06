@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use App\Service\PayPalService;
 
 #[Route('/commande')]
 class CheckoutController extends AbstractController
@@ -27,6 +28,7 @@ class CheckoutController extends AbstractController
         private AddressRepository $addressRepository,
         private CarrierRepository $carrierRepository,
         private StripeService $stripeService,
+        private PayPalService $paypalService,
         private EntityManagerInterface $entityManager
     ) {
     }
@@ -390,5 +392,154 @@ class CheckoutController extends AbstractController
         $this->entityManager->flush();
 
         return $order;
+    }
+
+    /**
+     * Créer une commande PayPal
+     */
+    #[Route('/paiement/paypal', name: 'app_checkout_paypal', methods: ['POST'])]
+    public function paypalCheckout(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        if ($this->cartService->isEmpty()) {
+            $this->addFlash('error', 'Votre panier est vide.');
+            return $this->redirectToRoute('app_shop');
+        }
+
+        if (!$this->checkoutService->isComplete()) {
+            $this->addFlash('warning', 'Veuillez compléter toutes les étapes.');
+            return $this->redirectToRoute('app_checkout_address');
+        }
+
+        // Créer la commande en base
+        $order = $this->createOrder();
+
+        // Préparer les items pour PayPal
+        $paypalItems = [];
+        foreach ($this->cartService->getCartWithDetails() as $item) {
+            $paypalItems[] = [
+                'name' => $item['product']->getName(),
+                'description' => $item['product']->getCategory()->getName(),
+                'price' => (float) $item['product']->getPrice(),
+                'quantity' => $item['quantity'],
+            ];
+        }
+
+        // Ajouter les frais de livraison
+        $carrier = $this->checkoutService->getSelectedCarrier();
+        $paypalItems[] = [
+            'name' => 'Livraison - ' . $carrier->getName(),
+            'description' => $carrier->getDeliveryTime(),
+            'price' => (float) $carrier->getPrice(),
+            'quantity' => 1,
+        ];
+
+        $total = (float) $order->getTotalAmount();
+
+        // Créer la commande PayPal
+        $result = $this->paypalService->createOrder(
+            $paypalItems,
+            $total,
+            'EUR',
+            [
+                'order_id' => (string) $order->getId(),
+                'return_url' => $this->generateUrl('app_checkout_paypal_success', [
+                    'orderId' => $order->getId()
+                ], UrlGeneratorInterface::ABSOLUTE_URL),
+                'cancel_url' => $this->generateUrl('app_checkout_cancel', [
+                    'orderId' => $order->getId()
+                ], UrlGeneratorInterface::ABSOLUTE_URL),
+            ]
+        );
+
+        if (!$result['success']) {
+            $this->addFlash('error', 'Erreur lors de la création du paiement PayPal : ' . $result['error']);
+            return $this->redirectToRoute('app_checkout_summary');
+        }
+
+        // Rediriger vers PayPal pour l'approbation
+        return $this->redirect($result['approve_url']);
+    }
+
+    /**
+     * Page de succès après paiement PayPal
+     */
+    #[Route('/paypal/succes/{orderId}', name: 'app_checkout_paypal_success')]
+    public function paypalSuccess(int $orderId, Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $user = $this->getAuthenticatedUser();
+        $order = $this->entityManager->getRepository(Order::class)->find($orderId);
+
+        if (!$order || $order->getUser() !== $user) {
+            throw $this->createNotFoundException('Commande introuvable');
+        }
+
+        $paypalOrderId = $request->query->get('token');
+
+        if (!$paypalOrderId) {
+            $this->addFlash('error', 'Token PayPal manquant.');
+            return $this->redirectToRoute('app_checkout_summary');
+        }
+
+        // Vérifier si la commande n'est pas déjà payée
+        if ($order->getStatus() !== Order::STATUS_PENDING) {
+            $this->addFlash('info', 'Cette commande a déjà été traitée.');
+            return $this->render('checkout/success.html.twig', [
+                'order' => $order,
+            ]);
+        }
+
+        // Capturer le paiement PayPal
+        $result = $this->paypalService->captureOrder($paypalOrderId);
+
+        if (!$result['success']) {
+            $this->addFlash('error', 'Erreur lors de la capture du paiement : ' . $result['error']);
+            return $this->redirectToRoute('app_checkout_summary');
+        }
+
+        if ($result['status'] === 'COMPLETED') {
+            // Créer l'enregistrement de paiement
+            $payment = new Payment();
+            $payment->setOrder($order);
+            $payment->setPaymentMethod(Payment::METHOD_PAYPAL);
+            $payment->setTransactionId($result['capture_id']);
+            $payment->setAmount($order->getTotalAmount());
+            $payment->setCurrency('EUR');
+            $payment->setStatus(Payment::STATUS_COMPLETED);
+            $payment->setPaidAt(new \DateTimeImmutable());
+
+            $this->entityManager->persist($payment);
+
+            // Mettre à jour la commande
+            $order->setStatus(Order::STATUS_PAID);
+            $order->setPaidAt(new \DateTimeImmutable());
+            $order->setPayment($payment);
+
+            // Décrémenter le stock
+            foreach ($order->getOrderItems() as $orderItem) {
+                $product = $orderItem->getProduct();
+                if ($product) {
+                    $newStock = $product->getStock() - $orderItem->getQuantity();
+                    $product->setStock(max(0, $newStock));
+                }
+            }
+
+            $this->entityManager->flush();
+
+            // Vider le panier et le checkout
+            $this->cartService->clear();
+            $this->checkoutService->clear();
+
+            $this->addFlash('success', '🎉 Paiement PayPal réussi ! Votre commande a été confirmée.');
+        } else {
+            $this->addFlash('warning', 'Le paiement PayPal est en attente de confirmation.');
+        }
+
+        return $this->render('checkout/success.html.twig', [
+            'order' => $order,
+        ]);
     }
 }
